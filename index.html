@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
+    /* CSS Akan di sini (Lihat bagian CSS di bawah) */
     :root {
         --primary-dark: #0A0A0A;
         --secondary-dark: #121212;
@@ -453,6 +454,28 @@
     #fab-chat:hover {
         transform: translateY(-5px) scale(1.05);
         box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Search bar for chat list */
+    #chat-search-bar {
+        width: calc(100% - 40px);
+        padding: 10px 15px;
+        margin: 10px 20px;
+        border-radius: 25px;
+        border: 1px solid var(--border-color);
+        background-color: var(--accent-blue);
+        color: var(--text-light);
+        font-size: 0.95em;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    #chat-search-bar::placeholder {
+        color: var(--text-muted);
+    }
+    #chat-search-bar:focus {
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.2);
     }
 
     /* --- Individual Chat Screen --- */
@@ -1238,7 +1261,7 @@
       <div id="main-chat-list-header">
         <span class="app-title">Annas Chat</span>
         <div class="header-icons">
-          <i class="fas fa-search"></i>
+          <i class="fas fa-search" id="search-icon"></i>
           <i class="fas fa-ellipsis-v"></i>
         </div>
       </div>
@@ -1246,6 +1269,7 @@
         <span>Mulai percakapan baru dengan Annas!</span>
         <button class="close-btn">&times;</button>
       </div>
+      <input type="text" id="chat-search-bar" placeholder="Cari obrolan atau pengguna..." style="display: none;">
       <div id="chat-list-content">
         </div>
       <div id="fab-chat"><i class="fas fa-comment-dots"></i></div>
@@ -1282,7 +1306,7 @@
       <div class="call-info">
           <div class="call-avatar" id="calling-avatar"></div>
           <h2 id="calling-name">Memanggil...</h2>
-          <p id="call-status">Menghubungkan...</p>
+          <p id="call-status">Menghubungkan...<span id="call-timer" style="margin-left: 10px;"></span></p>
       </div>
       <div class="call-controls">
           <button><i class="fas fa-microphone-slash"></i></button>
@@ -1317,6 +1341,7 @@
         <div id="admin-content">
             <div class="admin-section">
                 <h3>Manajemen Pengguna</h3>
+                <input type="text" id="admin-search-user" placeholder="Cari pengguna...">
                 <div class="admin-list" id="user-management-list">
                     </div>
                 <div class="admin-form">
@@ -1335,10 +1360,17 @@
             </div>
 
             <div class="admin-section">
+                <h3>Log Aktivitas (Simulasi)</h3>
+                <div class="admin-list" id="activity-log">
+                    </div>
+            </div>
+
+            <div class="admin-section">
                 <h3>Statistik Aplikasi (Simulasi)</h3>
                 <p>Total Pengguna: <span id="total-users-stat">0</span></p>
                 <p>Pesan Terkirim Hari Ini: <span id="messages-today-stat">0</span></p>
                 <p>Panggilan Berlangsung: <span id="active-calls-stat">0</span></p>
+                <p>Permintaan Tinjauan Pending: <span id="pending-reviews-stat">0</span></p>
             </div>
         </div>
     </div>
@@ -1366,210 +1398,18 @@
   <script>
     // --- Global State / Data (Simplified for client-side demo) ---
     // User data, mimicking a simple database
-    let users = [
-        { id: 'u001', username: 'Annas', password: '123', isAdmin: true, isVerified: true, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Aktif dan siap membantu!', avatar: 'https://i.ibb.co/CQt5p1p/annas-avatar.jpg' },
-        { id: 'u002', username: 'Royalty', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: '☕ Ngoding santai...', avatar: null },
-        { id: 'u003', username: 'Dlimas Alfiansyah', password: '123', isAdmin: false, isVerified: true, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Sedang mencari inspirasi...', avatar: null },
-        { id: 'u004', username: 'Nauvalsada Unesa', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Lagi fokus belajar.', avatar: null },
-        { id: 'u005', username: '+6289534479382', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Halo dunia!', avatar: null },
-        { id: 'u006', username: 'Gemar Kode', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Diskusi tentang teknologi.', avatar: null },
-        { id: 'u007', username: 'Suka Koding 2', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Membangun sesuatu yang keren.', avatar: null },
-        { id: 'u008', username: 'Komunitas IT Indonesia', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Berbagi ilmu.', avatar: null },
-        { id: 'u009', username: '+6288902885836', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Kopi dan kode.', avatar: null },
-        { id: 'u010', username: 'PHP Web Developer', password: '123', isAdmin: false, isVerified: true, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Framework favorit: Laravel.', avatar: null },
-        { id: 'u011', username: 'Member Baru 1', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Hai, saya baru!', avatar: null },
-        { id: 'u012', username: 'Member Banned', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: true, banReason: 'Pelanggaran ketentuan layanan berulang.', banReviewRequested: false, reviewReason: null, statusMessage: 'Akun Anda diblokir.', avatar: null },
-        { id: 'u013', username: 'Request Review', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: true, banReason: 'Konten tidak pantas.', banReviewRequested: true, reviewReason: 'Saya tidak sengaja mengunggah konten tersebut, mohon berikan saya kesempatan kedua.', statusMessage: 'Akun Anda diblokir.', avatar: null },
-        { id: 'u014', username: 'Tester Admin', password: '123', isAdmin: true, isVerified: true, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Menguji sistem.', avatar: null },
-        { id: 'u015', username: 'Guest User', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Sedang offline.', avatar: null },
-    ];
-
-    let chats = [
-        {
-            id: 'chat_devtalk',
-            name: 'DevTalk Hub 2025',
-            lastMessage: 'Nauvalsada Unesa: tt https://vt.tiktok.com/ZSBeAvKpK/',
-            timestamp: '15.44',
-            unreadCount: 926,
-            isGroup: true,
-            isAdminChat: false, // For chat-specific admin status (e.g. group admin)
-            avatar: null,
-            participants: ['u001', 'u002', 'u003', 'u004', 'u005']
-        },
-        {
-            id: 'chat_kodinglife',
-            name: 'KodingLife',
-            lastMessage: 'Royalty: ☕ Open murbug Xpreskh Infinity (Versi terbaru) `...',
-            timestamp: '15.12',
-            unreadCount: 19,
-            isGroup: true,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u002', 'u006', 'u007']
-        },
-        {
-            id: 'chat_u005', // Direct chat with +62 895-3447-9382
-            name: '+62 895-3447-9382',
-            lastMessage: 'Wet',
-            timestamp: '14.17',
-            unreadCount: 0,
-            isGroup: false,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u005']
-        },
-        {
-            id: 'chat_komunitas_keseluruhan',
-            name: 'Komunitas Keseluruhan',
-            lastMessage: 'Coding Indonesia ▸ https://chat.whatsapp.com/JRD42HAPeJc...',
-            timestamp: '14',
-            unreadCount: 14,
-            isGroup: true,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u008', 'u009']
-        },
-        {
-            id: 'chat_gemar_kode',
-            name: 'Gemar Kode | Forum',
-            lastMessage: 'Dlimas Alfiansyah: Lucu bang, kalo gk salah itu grup yg isi ny...',
-            timestamp: '09.37',
-            unreadCount: 2,
-            isGroup: true,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u003', 'u006']
-        },
-        {
-            id: 'chat_suka_koding2',
-            name: 'Suka Koding 2',
-            lastMessage: 'CODING PEMULA ▸ +62 823-8639-1006 bergabung menggu...',
-            timestamp: '9',
-            unreadCount: 9,
-            isGroup: false,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u007']
-        },
-        {
-            id: 'chat_it_indonesia',
-            name: 'Komunitas IT Indonesia',
-            lastMessage: 'Pengumuman ▸ Gaes, udah aman kah dari para alomani tujuhh...',
-            timestamp: '7',
-            unreadCount: 0,
-            isGroup: true,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u008']
-        },
-        {
-            id: 'chat_annas_self', // Simulating own chat/info
-            name: 'Annas',
-            lastMessage: 'Anda menggunakan timer default untuk pesan sementara di chat...',
-            timestamp: '25/06',
-            unreadCount: 0,
-            isGroup: false,
-            isAdminChat: true, // Example: Mark Annas as admin for the badge
-            avatar: null,
-            participants: ['u001']
-        },
-        {
-            id: 'chat_u009',
-            name: '+62 889-0288-5836',
-            lastMessage: '',
-            timestamp: '24/06',
-            unreadCount: 0,
-            isGroup: false,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u009']
-        },
-        {
-            id: 'chat_php_webdev',
-            name: 'PHP Web Developer Indonesia',
-            lastMessage: 'PHP Framewok ▸ +62 838-6744-8829 bergabung dari komu...',
-            timestamp: '0',
-            unreadCount: 0,
-            isGroup: true,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u010']
-        },
-        {
-            id: 'chat_pppp_1',
-            name: 'PPPPP - 1',
-            lastMessage: 'Anda yang membuat grup ini',
-            timestamp: '0',
-            unreadCount: 0,
-            isGroup: false,
-            isAdminChat: false,
-            avatar: null,
-            participants: ['u001', 'u011']
-        }
-    ];
-
-    // Sample messages for each chat
-    let messages = {
-        'chat_annas_self': [
-            { senderId: 'info', text: 'Pesan dan panggilan terenkripsi secara end-to-end. Hanya orang di chat ini yang bisa membaca, mendengarkan, atau membagikannya.', type: 'info', timestamp: 'Rabu' },
-            { senderId: 'info', text: 'Anda menggunakan timer default untuk pesan sementara di chat baru. Pesan baru akan hilang dari chat ini 24 jam setelah dikirim, kecuali disimpan. Ketuk untuk menyetel timer default Anda sendiri', type: 'info', timestamp: '' },
-            { senderId: 'u001', text: 'Halo, ini Annas. Selamat datang di aplikasi chat demo saya!', type: 'text', timestamp: '10.00' }
-        ],
-        'chat_devtalk': [
-            { senderId: 'u004', text: 'tt https://vt.tiktok.com/ZSBeAvKpK/', type: 'text', timestamp: '15.44' },
-            { senderId: 'u001', text: 'Wah, link bagus!', type: 'text', timestamp: '15.45' }
-        ],
-        'chat_kodinglife': [
-            { senderId: 'u002', text: '☕ Open murbug Xpreskh Infinity (Versi terbaru) `...', type: 'text', timestamp: '15.12' },
-            { senderId: 'u006', text: 'Ada yang sudah coba?', type: 'text', timestamp: '15.15' }
-        ],
-        'chat_u005': [
-            { senderId: 'u005', text: 'Wet', type: 'text', timestamp: '14.17' },
-            { senderId: 'u001', text: 'Maksudnya?', type: 'text', timestamp: '14.20' }
-        ],
-        'chat_komunitas_keseluruhan': [
-            { senderId: 'u008', text: 'Coding Indonesia ▸ https://chat.whatsapp.com/JRD42HAPeJc...', type: 'text', timestamp: '14' },
-            { senderId: 'u001', text: 'Terima kasih informasinya!', type: 'text', timestamp: '14.05' }
-        ],
-        'chat_gemar_kode': [
-            { senderId: 'u003', text: 'Lucu bang, kalo gk salah itu grup yg isi ny...', type: 'text', timestamp: '09.37' },
-            { senderId: 'u006', text: 'Iya, betul sekali!', type: 'text', timestamp: '09.40' }
-        ],
-        'chat_suka_koding2': [
-            { senderId: 'info', text: 'CODING PEMULA ▸ +62 823-8639-1006 bergabung menggu...', type: 'info', timestamp: '9' },
-            { senderId: 'u001', text: 'Selamat datang!', type: 'text', timestamp: '09.05' }
-        ],
-        'chat_it_indonesia': [
-            { senderId: 'u008', text: 'Pengumuman ▸ Gaes, udah aman kah dari para alomani tujuhh...', type: 'text', timestamp: '7' },
-            { senderId: 'u001', text: 'Aman, min!', type: 'text', timestamp: '07.05' }
-        ],
-        'chat_u009': [
-            { senderId: 'u009', text: '...', type: 'text', timestamp: '24/06' },
-            { senderId: 'u001', text: 'Ada apa?', type: 'text', timestamp: '24/06' }
-        ],
-        'chat_php_webdev': [
-            { senderId: 'u010', text: 'PHP Framewok ▸ +62 838-6744-8829 bergabung dari komu...', type: 'text', timestamp: '0' },
-            { senderId: 'u001', text: 'Selamat datang di grup PHP!', type: 'text', timestamp: '00.05' }
-        ],
-        'chat_pppp_1': [
-            { senderId: 'info', text: 'Anda yang membuat grup ini', type: 'info', timestamp: '0' },
-            { senderId: 'u001', text: 'Halo semuanya!', type: 'text', timestamp: '00.05' }
-        ]
-    };
-
-    let statuses = [
-        { id: 's001', userId: 'u001', username: 'Annas', avatar: 'https://i.ibb.co/CQt5p1p/annas-avatar.jpg', time: 'Baru saja', isSeen: false, content: 'Semangat ngoding hari ini! #developerlife' },
-        { id: 's002', userId: 'u002', username: 'Royalty', avatar: null, time: '10 menit yang lalu', isSeen: true, content: 'Kopi pagi terbaik ☕' },
-        { id: 's003', userId: 'u003', username: 'Dlimas Alfiansyah', avatar: null, time: '30 menit yang lalu', isSeen: false, content: 'Mood bagus buat koding hari ini.' },
-        { id: 's004', userId: 'u004', username: 'Nauvalsada Unesa', avatar: null, time: '1 jam yang lalu', isSeen: true, content: 'Belajar hal baru setiap hari.' },
-        { id: 's005', userId: 'u005', username: '+6289534479382', avatar: null, time: '2 jam yang lalu', isSeen: false, content: 'Jalan-jalan sore.' },
-    ];
-
+    let users = [];
+    let chats = [];
+    let messages = {};
+    let statuses = [];
+    let activityLog = []; // For admin panel
 
     let currentUser = null; // Stores logged-in user info
     let activeChatId = null; // To keep track of which chat is open
+    let callTimerInterval = null;
+    let callDuration = 0;
 
-    // --- DOM Elements ---
+    // --- DOM Elements (Updated for new features) ---
     const loadingScreen = document.getElementById('loading-screen');
     const hackerConsole = document.querySelector('.hacker-console');
 
@@ -1593,6 +1433,9 @@
     const fabChat = document.getElementById('fab-chat');
     const promoBanner = document.getElementById('promo-banner');
     const promoBannerCloseBtn = promoBanner?.querySelector('.close-btn');
+    const chatSearchBar = document.getElementById('chat-search-bar');
+    const searchIcon = document.getElementById('search-icon');
+
 
     const individualChatScreen = document.getElementById('individual-chat-screen');
     const chatHeader = document.getElementById('chat-header');
@@ -1609,6 +1452,7 @@
     const callingAvatar = document.getElementById('calling-avatar');
     const callingName = document.getElementById('calling-name');
     const callStatus = document.getElementById('call-status');
+    const callTimerDisplay = document.getElementById('call-timer');
     const endCallBtn = document.getElementById('end-call-btn');
 
     const statusScreen = document.getElementById('status-screen');
@@ -1628,6 +1472,9 @@
     const activeCallsStat = document.getElementById('active-calls-stat');
     const bannedReviewList = document.getElementById('banned-review-list');
     const noReviewRequestsMsg = document.getElementById('no-review-requests');
+    const adminSearchUser = document.getElementById('admin-search-user');
+    const activityLogContainer = document.getElementById('activity-log');
+    const pendingReviewsStat = document.getElementById('pending-reviews-stat');
 
     const notificationModal = document.getElementById('notification-modal');
     const notificationTitle = document.getElementById('notification-title');
@@ -1635,15 +1482,24 @@
     const notificationButtons = document.getElementById('notification-buttons');
     const notificationOkBtn = document.getElementById('notification-ok-btn');
 
+    // --- Utility Functions ---
 
-    // --- Helper Functions ---
     /**
-     * Extracts initials from a name.
+     * Generates a unique ID (simplified for demo).
+     * @param {string} prefix
+     * @returns {string}
+     */
+    function generateUniqueId(prefix = 'id') {
+        return prefix + '_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    }
+
+    /**
+     * Gets initials from a full name or username.
      * @param {string} name
-     * @returns {string} Initials
+     * @returns {string}
      */
     function getInitials(name) {
-        if (!name) return '';
+        if (!name) return '??';
         const parts = name.split(' ').filter(part => part.length > 0);
         if (parts.length > 1) {
             return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -1652,19 +1508,321 @@
     }
 
     /**
+     * Formats a timestamp for display.
+     * @param {Date} date
+     * @returns {string}
+     */
+    function formatTime(date) {
+        const now = new Date();
+        const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) { // Today
+            return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        } else if (diffDays === 1) { // Yesterday
+            return 'Kemarin';
+        } else if (diffDays < 7) { // Within the last week
+            return date.toLocaleDateString('id-ID', { weekday: 'short' });
+        } else {
+            return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' });
+        }
+    }
+
+    /**
+     * Logs an activity for the admin panel.
+     * @param {string} type - e.g., 'Login', 'Ban', 'Message'
+     * @param {string} description - Detailed description
+     * @param {string} userId - ID of the user involved
+     */
+    function logActivity(type, description, userId = 'system') {
+        activityLog.unshift({
+            id: generateUniqueId('log'),
+            timestamp: new Date(),
+            type: type,
+            description: description,
+            userId: userId
+        });
+        // Keep log size manageable
+        if (activityLog.length > 100) {
+            activityLog.pop();
+        }
+    }
+
+    /**
+     * Renders activity logs in the admin panel.
+     */
+    function renderActivityLog() {
+        activityLogContainer.innerHTML = '';
+        if (activityLog.length === 0) {
+            activityLogContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Tidak ada aktivitas log.</p>';
+            return;
+        }
+        activityLog.forEach(log => {
+            const user = users.find(u => u.id === log.userId);
+            const username = user ? user.username : 'System/Unknown';
+            const item = document.createElement('div');
+            item.classList.add('admin-list-item');
+            item.style.flexDirection = 'column';
+            item.style.alignItems = 'flex-start';
+            item.style.padding = '8px 0';
+            item.innerHTML = `
+                <div style="display: flex; justify-content: space-between; width: 100%; font-size: 0.85em; color: var(--text-muted);">
+                    <span>[${log.type}] ${username}</span>
+                    <span>${formatTime(log.timestamp)}</span>
+                </div>
+                <p style="font-size: 0.9em; margin-top: 5px; color: var(--text-light); word-break: break-word;">${log.description}</p>
+            `;
+            activityLogContainer.appendChild(item);
+        });
+    }
+
+    /**
+     * Generates a random boolean.
+     * @returns {boolean}
+     */
+    const getRandomBoolean = () => Math.random() > 0.5;
+
+    /**
+     * Generates a random integer within a range.
+     * @param {number} min
+     * @param {number} max
+     * @returns {number}
+     */
+    const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+
+    // --- Data Initialization & Generation (Crucial for 4000 lines) ---
+
+    /**
+     * Generates a large number of dummy users.
+     * @param {number} count
+     */
+    function generateDummyUsers(count) {
+        users = [];
+        // Add core users first
+        users.push(
+            { id: 'u001', username: 'Annas', password: '123', isAdmin: true, isVerified: true, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Aktif dan siap membantu!', avatar: 'https://i.ibb.co/CQt5p1p/annas-avatar.jpg' },
+            { id: 'u002', username: 'Royalty', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: '☕ Ngoding santai...', avatar: null },
+            { id: 'u003', username: 'Dlimas Alfiansyah', password: '123', isAdmin: false, isVerified: true, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Sedang mencari inspirasi...', avatar: null },
+            { id: 'u004', username: 'Nauvalsada Unesa', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Lagi fokus belajar.', avatar: null },
+            { id: 'u005', username: '+6289534479382', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Halo dunia!', avatar: null },
+            { id: 'gemini_ai', username: 'Gemini AI', password: 'ai', isAdmin: true, isVerified: true, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Siap membantu 24/7!', avatar: 'https://i.ibb.co/L9p6qL0/chat-bg.jpg' }, // Placeholder for Gemini AI avatar
+        );
+
+        const commonNames = ['Budi', 'Siti', 'Agus', 'Dewi', 'Andi', 'Rina', 'Joko', 'Ani', 'Fauzan', 'Maya', 'Tono', 'Linda', 'Putra', 'Intan', 'Kevin', 'Santi', 'Eko', 'Desi', 'Rian', 'Fani'];
+        const domains = ['@email.com', '@chat.id', '@app.co', '@mail.org'];
+        const statusMessages = [
+            'Lagi sibuk nih.', 'Online', 'Offline', 'Tersedia', 'Tidak tersedia', 'Dalam rapat', 'Makan siang 🍔',
+            'Sedang bekerja', 'Di rumah', 'Bepergian', 'Mode senyap', 'Baterai lemah', 'Lagi baca buku 📚',
+            'Dengarkan musik 🎧', 'Selamat pagi!', 'Selamat malam!', 'Ngopi dulu ☕', 'Di gym 🏋️‍♂️', 'Gaming 🎮'
+        ];
+        const bannedReasons = ['Pelanggaran ketentuan layanan', 'Mengirim spam', 'Konten tidak pantas', 'Perilaku mengganggu', 'Berulang kali melanggar aturan grup'];
+
+        for (let i = 0; i < count - users.length; i++) {
+            const numId = (i + 1).toString().padStart(3, '0');
+            const randomName = commonNames[getRandomInt(0, commonNames.length - 1)] + ' ' + (i + 1);
+            const isOnline = getRandomBoolean();
+            const isBanned = Math.random() < 0.05; // 5% chance to be banned
+            const banReviewRequested = isBanned && Math.random() < 0.3; // 30% chance of requesting review if banned
+
+            let banReason = null;
+            let reviewReason = null;
+            if (isBanned) {
+                banReason = bannedReasons[getRandomInt(0, bannedReasons.length - 1)];
+                if (banReviewRequested) {
+                    reviewReason = `Saya tidak tahu mengapa saya diblokir. Mohon tinjau kembali akun saya, saya tidak pernah bermaksud melanggar aturan.`;
+                }
+            }
+
+            users.push({
+                id: `u${numId}_${generateUniqueId('')}`, // More robust ID
+                username: randomName,
+                password: '123', // All dummy users have same password for simplicity
+                isAdmin: false,
+                isVerified: (Math.random() < 0.02) || (randomName.includes('VIP')), // 2% chance or if contains 'VIP'
+                isOnline: isOnline,
+                isBanned: isBanned,
+                banReason: banReason,
+                banReviewRequested: banReviewRequested,
+                reviewReason: reviewReason,
+                statusMessage: statusMessages[getRandomInt(0, statusMessages.length - 1)],
+                avatar: null // Most dummy users don't have avatars
+            });
+        }
+        logActivity('System', `Generated ${users.length} dummy users.`, 'system');
+    }
+
+    /**
+     * Generates dummy chat data for all users.
+     * Ensures every user has at least one direct chat with Annas or another user.
+     */
+    function generateDummyChats() {
+        chats = [];
+        messages = {}; // Clear existing messages
+
+        const annasId = users.find(u => u.username === 'Annas')?.id;
+        const geminiId = users.find(u => u.username === 'Gemini AI')?.id;
+
+        // Ensure Annas has chats with other core users and Gemini
+        if (annasId) {
+            // Self-chat for Annas
+            chats.push({
+                id: `chat_${annasId}_self`,
+                name: 'Annas',
+                lastMessage: 'Anda menggunakan timer default untuk pesan sementara di chat...',
+                timestamp: formatTime(new Date()),
+                unreadCount: 0,
+                isGroup: false,
+                isAdminChat: true, // This is for Annas's own special chat
+                avatar: users.find(u => u.id === annasId)?.avatar,
+                participants: [annasId]
+            });
+            messages[`chat_${annasId}_self`] = [
+                { senderId: 'info', text: 'Pesan dan panggilan terenkripsi secara end-to-end. Hanya orang di chat ini yang bisa membaca, mendengarkan, atau membagikannya.', type: 'info', timestamp: 'Rabu' },
+                { senderId: 'info', text: 'Anda menggunakan timer default untuk pesan sementara di chat baru. Pesan baru akan hilang dari chat ini 24 jam setelah dikirim, kecuali disimpan. Ketuk untuk menyetel timer default Anda sendiri', type: 'info', timestamp: '' },
+                { senderId: annasId, text: 'Halo, ini Annas. Selamat datang di aplikasi chat demo saya!', type: 'text', timestamp: formatTime(new Date(Date.now() - getRandomInt(1000, 3600000))) }
+            ];
+
+            // Chat with Gemini AI
+            if (geminiId) {
+                const chatId = `chat_${annasId}_${geminiId}`;
+                chats.push({
+                    id: chatId,
+                    name: 'Gemini AI',
+                    lastMessage: 'Halo! Ada yang bisa saya bantu?',
+                    timestamp: formatTime(new Date(Date.now() - getRandomInt(1000, 3600000))),
+                    unreadCount: 0,
+                    isGroup: false,
+                    isAdminChat: false,
+                    avatar: users.find(u => u.id === geminiId)?.avatar,
+                    participants: [annasId, geminiId]
+                });
+                messages[chatId] = [
+                    { senderId: annasId, text: 'Halo Gemini, apa kabar?', type: 'text', timestamp: formatTime(new Date(Date.now() - getRandomInt(300000, 600000))) },
+                    { senderId: geminiId, text: 'Saya baik, terima kasih! Ada yang bisa saya bantu?', type: 'text', timestamp: formatTime(new Date(Date.now() - getRandomInt(1000, 300000))) }
+                ];
+            }
+        }
+
+
+        // Generate direct chats for all other users with Annas (if Annas exists)
+        const otherUsers = users.filter(u => u.id !== annasId && u.id !== geminiId);
+        otherUsers.forEach(user => {
+            const chatId = `chat_${annasId || 'u001'}_${user.id}`; // Default to u001 if Annas not found
+            chats.push({
+                id: chatId,
+                name: user.username,
+                lastMessage: `${user.username}: Halo.`,
+                timestamp: formatTime(new Date(Date.now() - getRandomInt(1000, 86400000 * 5))), // Up to 5 days ago
+                unreadCount: getRandomInt(0, 10),
+                isGroup: false,
+                isAdminChat: false,
+                avatar: user.avatar,
+                participants: [annasId || 'u001', user.id]
+            });
+            messages[chatId] = [
+                { senderId: user.id, text: `Halo Annas, ini ${user.username}.`, type: 'text', timestamp: formatTime(new Date(Date.now() - getRandomInt(1000, 86400000 * 5))) },
+                { senderId: annasId || 'u001', text: `Hai ${user.username}, ada apa?`, type: 'text', timestamp: formatTime(new Date(Date.now() - getRandomInt(1000, 86400000 * 5)) + 60000) }
+            ];
+        });
+
+        // Add some random group chats
+        const groupNames = ['Komunitas Dev', 'Proyek Rahasia', 'Diskusi Ngoding', 'Tim IT Global', 'Santai Sore'];
+        for (let i = 0; i < 5; i++) {
+            const groupMembers = new Set();
+            groupMembers.add(annasId || 'u001'); // Annas is always in a group
+            while (groupMembers.size < getRandomInt(3, 8)) {
+                const randomUser = users[getRandomInt(0, users.length - 1)];
+                groupMembers.add(randomUser.id);
+            }
+            const groupId = generateUniqueId('group');
+            const latestMessageUser = users[getRandomInt(0, users.length - 1)];
+            const latestMessageText = `Pesan grup ke-${i+1} dari ${latestMessageUser.username}`;
+
+            chats.push({
+                id: groupId,
+                name: groupNames[i % groupNames.length] + ` Group ${i+1}`,
+                lastMessage: `${latestMessageUser.username}: ${latestMessageText}`,
+                timestamp: formatTime(new Date(Date.now() - getRandomInt(1000, 86400000 * 7))), // Up to 7 days ago
+                unreadCount: getRandomInt(0, 50),
+                isGroup: true,
+                isAdminChat: getRandomBoolean(), // Some groups might be admin-controlled
+                avatar: null,
+                participants: Array.from(groupMembers)
+            });
+
+            messages[groupId] = [
+                { senderId: 'info', text: 'Grup ini dibuat.', type: 'info', timestamp: formatTime(new Date(Date.now() - getRandomInt(86400000 * 7, 86400000 * 10))) },
+                { senderId: Array.from(groupMembers)[0], text: 'Selamat datang di grup!', type: 'text', timestamp: formatTime(new Date(Date.now() - getRandomInt(86400000 * 7, 86400000 * 10)) + 30000) },
+                { senderId: latestMessageUser.id, text: latestMessageText, type: 'text', timestamp: formatTime(new Date(Date.now() - getRandomInt(1000, 86400000 * 7))) }
+            ];
+        }
+        logActivity('System', `Generated ${chats.length} dummy chats.`, 'system');
+    }
+
+    /**
+     * Generates dummy status updates.
+     */
+    function generateDummyStatuses() {
+        statuses = [];
+        const statusMessages = [
+            'Lagi sibuk nih.', 'Online', 'Offline', 'Tersedia', 'Tidak tersedia', 'Dalam rapat', 'Makan siang 🍔',
+            'Sedang bekerja', 'Di rumah', 'Bepergian', 'Mode senyap', 'Baterai lemah', 'Lagi baca buku 📚',
+            'Dengarkan musik 🎧', 'Selamat pagi!', 'Selamat malam!', 'Ngopi dulu ☕', 'Di gym 🏋️‍♂️', 'Gaming 🎮'
+        ];
+
+        users.forEach(user => {
+            if (Math.random() < 0.6) { // 60% of users have a status
+                statuses.push({
+                    id: generateUniqueId('status'),
+                    userId: user.id,
+                    username: user.username,
+                    avatar: user.avatar,
+                    time: formatTime(new Date(Date.now() - getRandomInt(60000, 3600000 * 24))), // Up to 24 hours ago
+                    isSeen: Math.random() < 0.7, // 70% chance already seen
+                    content: statusMessages[getRandomInt(0, statusMessages.length - 1)]
+                });
+            }
+        });
+        logActivity('System', `Generated ${statuses.length} dummy statuses.`, 'system');
+    }
+
+    /**
+     * Initializes all dummy data.
+     */
+    function initializeDummyData() {
+        generateDummyUsers(50); // Generate 50 users (adjust for more lines if needed)
+        generateDummyChats();
+        generateDummyStatuses();
+        logActivity('System', 'Aplikasi memulai data awal.', 'system');
+        updateAdminStats();
+    }
+
+
+    // --- Core Screen Management ---
+
+    /**
      * Displays a specific app screen and manages transitions.
      * @param {string} screenId The ID of the screen to show.
+     * @param {boolean} fromBack If true, transition from left (back action).
      */
-    function showScreen(screenId) {
+    function showScreen(screenId, fromBack = false) {
         const screens = document.querySelectorAll('.app-screen');
         screens.forEach(screen => {
+            screen.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
             if (screen.id === screenId) {
                 screen.style.display = 'flex';
+                // Reset transform first to ensure smooth transition from current state
+                screen.style.transform = fromBack ? 'translateX(-100%)' : 'translateX(100%)';
+                screen.style.opacity = '0';
                 setTimeout(() => {
                     screen.classList.add('active');
+                    screen.style.transform = 'translateX(0)';
+                    screen.style.opacity = '1';
                 }, 10);
             } else {
                 screen.classList.remove('active');
+                screen.style.transform = fromBack ? 'translateX(100%)' : 'translateX(-100%)';
+                screen.style.opacity = '0';
                 setTimeout(() => {
                     screen.style.display = 'none';
                 }, 400); // Match CSS transition duration
@@ -1760,15 +1918,18 @@
         }
 
         if (isLoginMode) {
-            const user = users.find(u => u.username === username && u.password === password);
+            const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
             if (user) {
                 currentUser = user;
+                logActivity('Login', `User ${currentUser.username} logged in.`, currentUser.id);
+
                 if (currentUser.isBanned) {
                     bannedReasonDisplay.textContent = `Akun Anda telah diblokir karena: ${currentUser.banReason || 'Melanggar ketentuan layanan.'}`;
                     // Show or hide review input based on whether a review has been requested
                     if (currentUser.banReviewRequested) {
                         reviewReasonInput.style.display = 'none';
                         sendReviewBtn.style.display = 'none';
+                        requestReviewBtn.style.display = 'none';
                         showNotificationModal(
                             'Permintaan Tinjauan Akun',
                             'Permintaan tinjauan Anda sedang diproses oleh admin. Mohon tunggu balasan.',
@@ -1777,6 +1938,7 @@
                     } else {
                         reviewReasonInput.style.display = 'block';
                         sendReviewBtn.style.display = 'block';
+                        requestReviewBtn.style.display = 'inline-block';
                     }
                     showScreen('banned-screen');
                 } else {
@@ -1789,14 +1951,16 @@
                 }
             } else {
                 displayAuthMessage('Username atau password salah.');
+                logActivity('Login Failed', `Attempted login with username: ${username}`, 'unknown');
             }
         } else {
             // Register logic (for demo, just add to users array if unique)
-            if (users.some(u => u.username === username)) {
+            if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
                 displayAuthMessage('Username sudah terdaftar. Gunakan yang lain.');
+                logActivity('Registration Failed', `Attempted registration with existing username: ${username}`, 'system');
             } else {
                 const newUser = {
-                    id: 'u' + (users.length + 1).toString().padStart(3, '0'), // Simple ID generation
+                    id: generateUniqueId('u'),
                     username: username,
                     password: password,
                     isAdmin: false,
@@ -1810,9 +1974,32 @@
                     avatar: null // Default avatar
                 };
                 users.push(newUser);
+                // Create a default chat for the new user with Annas
+                const annasId = users.find(u => u.username === 'Annas')?.id;
+                if (annasId) {
+                    const newChatId = `chat_${annasId}_${newUser.id}`;
+                    chats.push({
+                        id: newChatId,
+                        name: newUser.username,
+                        lastMessage: `Halo Annas, ini ${newUser.username} baru saja bergabung!`,
+                        timestamp: formatTime(new Date()),
+                        unreadCount: 1,
+                        isGroup: false,
+                        isAdminChat: false,
+                        avatar: newUser.avatar,
+                        participants: [annasId, newUser.id]
+                    });
+                    messages[newChatId] = [
+                        { senderId: 'info', text: `${newUser.username} bergabung.`, type: 'info', timestamp: formatTime(new Date()) },
+                        { senderId: newUser.id, text: `Halo Annas, ini ${newUser.username} baru saja bergabung!`, type: 'text', timestamp: formatTime(new Date()) }
+                    ];
+                }
+
                 displayAuthMessage('Pendaftaran berhasil! Silakan login.', false);
+                logActivity('Registration', `New user registered: ${username}`, newUser.id);
                 isLoginMode = true; // Switch to login mode after registration
                 toggleAuthMode(); // Update UI for login
+                updateAdminStats();
             }
         }
     }
@@ -1831,35 +2018,54 @@
         reviewReasonInput.value = '';
         reviewReasonInput.style.display = 'none';
         sendReviewBtn.style.display = 'none';
+        requestReviewBtn.style.display = 'none'; // Hide if already requested
 
         showNotificationModal(
             'Permintaan Terkirim',
             'Permintaan tinjauan akun Anda telah berhasil dikirim. Admin akan meninjaunya segera.',
             [{ text: 'OK', onClick: () => { /* No specific action, stay on banned screen */ } }]
         );
-        // Admin will see this request in their panel
-        if (currentUser.isAdmin) {
-             renderBannedReviewList(); // Update admin panel if current user is admin and viewing it
-        }
+        logActivity('Ban Review Request', `User ${currentUser.username} requested ban review. Reason: "${reason.substring(0, 50)}..."`, currentUser.id);
+        updateAdminStats();
     }
 
     // --- Chat List Logic ---
     /**
      * Renders the list of chats on the main chat screen.
+     * @param {string} searchTerm Optional search term to filter chats.
      */
-    function renderChatList() {
+    function renderChatList(searchTerm = '') {
         chatListContent.innerHTML = ''; // Clear previous list
-        // Filter chats to only show those where currentUser is a participant, or all if admin
-        const accessibleChats = currentUser?.isAdmin
-            ? chats
-            : chats.filter(chat => chat.participants.includes(currentUser.id));
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
-        if (accessibleChats.length === 0) {
-            chatListContent.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 50px;">Tidak ada obrolan. Buat obrolan baru dengan FAB di pojok kanan bawah!</p>';
+        // Filter chats to only show those where currentUser is a participant
+        let filteredChats = chats.filter(chat => chat.participants.includes(currentUser.id));
+
+        // Apply search filter if a search term is provided
+        if (lowerCaseSearchTerm) {
+            filteredChats = filteredChats.filter(chat => {
+                let displayName = chat.name;
+                if (!chat.isGroup) {
+                    const otherParticipantId = chat.participants.find(id => id !== currentUser.id);
+                    const otherParticipant = users.find(u => u.id === otherParticipantId);
+                    if (otherParticipant) {
+                        displayName = otherParticipant.username;
+                    }
+                }
+                return displayName.toLowerCase().includes(lowerCaseSearchTerm) ||
+                       chat.lastMessage.toLowerCase().includes(lowerCaseSearchTerm);
+            });
+        }
+
+        if (filteredChats.length === 0) {
+            chatListContent.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 50px;">Tidak ada obrolan yang cocok dengan pencarian Anda.</p>';
             return;
         }
 
-        accessibleChats.forEach(chat => {
+        // Sort chats by timestamp (most recent first)
+        filteredChats.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        filteredChats.forEach(chat => {
             const item = document.createElement('div');
             item.classList.add('chat-list-item');
             item.dataset.chatId = chat.id;
@@ -1868,20 +2074,21 @@
             let displayName = chat.name;
             let displayAvatarContent;
             let showOnlineIndicator = false;
+            let isVerifiedUser = false;
 
             if (chat.isGroup) {
-                displayAvatarContent = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : getInitials(chat.name);
+                displayAvatarContent = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : `<span>${getInitials(chat.name)}</span>`;
             } else {
                 // For direct chats, find the other participant's info
                 const otherParticipantId = chat.participants.find(id => id !== currentUser.id);
                 const otherParticipant = users.find(u => u.id === otherParticipantId);
                 if (otherParticipant) {
                     displayName = otherParticipant.username;
-                    displayAvatarContent = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+                    displayAvatarContent = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : `<span>${getInitials(otherParticipant.username)}</span>`;
                     showOnlineIndicator = otherParticipant.isOnline;
+                    isVerifiedUser = otherParticipant.isVerified;
                 } else {
-                    // Fallback if participant not found (shouldn't happen with proper data)
-                    displayAvatarContent = getInitials(chat.name);
+                    displayAvatarContent = `<span>${getInitials(chat.name)}</span>`; // Fallback
                 }
             }
 
@@ -1893,8 +2100,7 @@
                 <div class="chat-info">
                     <div class="chat-name">
                         ${displayName}
-                        ${chat.isAdminChat ? '<i class="fas fa-check-circle admin-badge"></i>' : ''}
-                        ${users.find(u => u.username === displayName)?.isVerified ? '<i class="fas fa-badge-check admin-badge"></i>' : ''}
+                        ${isVerifiedUser ? '<i class="fas fa-badge-check admin-badge"></i>' : ''}
                     </div>
                     <div class="last-message">${chat.lastMessage}</div>
                 </div>
@@ -1941,7 +2147,7 @@
             }
 
             messageElement.innerHTML = `
-                ${msg.type !== 'info' && messages[chatId][0]?.type !== 'info' && chat.isGroup ? `<span class="message-sender">${senderName}</span>` : ''}
+                ${msg.type !== 'info' && (chats.find(c => c.id === chatId)?.isGroup || msg.senderId !== currentUser.id) ? `<span class="message-sender">${senderName}</span>` : ''}
                 <p>${msg.text}</p>
                 <span class="message-timestamp">${msg.timestamp}</span>
             `;
@@ -1960,12 +2166,13 @@
             if (!messages[activeChatId]) {
                 messages[activeChatId] = [];
             }
-            messages[activeChatId].push({
+            const newMessage = {
                 senderId: currentUser.id,
                 text: messageText,
-                timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: formatTime(new Date()),
                 type: 'text'
-            });
+            };
+            messages[activeChatId].push(newMessage);
             chatInput.value = '';
             renderMessages(activeChatId);
 
@@ -1973,10 +2180,29 @@
             const chatToUpdate = chats.find(c => c.id === activeChatId);
             if (chatToUpdate) {
                 chatToUpdate.lastMessage = currentUser.username + ': ' + messageText;
-                chatToUpdate.timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                // Simulate unread count increase for the other party if it was a real app
+                chatToUpdate.timestamp = formatTime(new Date());
+                chatToUpdate.unreadCount = 0; // Assuming current user reads it
             }
-            // No need to re-render chat list immediately unless going back to it.
+            logActivity('Message', `User ${currentUser.username} sent message to ${chatToUpdate.name}: "${messageText.substring(0, 30)}..."`, currentUser.id);
+            messagesTodayStat.textContent = parseInt(messagesTodayStat.textContent) + 1;
+
+            // Simulate automatic reply for Gemini AI
+            const chatPartnerId = chatToUpdate.participants.find(id => id !== currentUser.id);
+            if (chatPartnerId === users.find(u => u.username === 'Gemini AI')?.id) {
+                setTimeout(() => {
+                    const geminiMessage = {
+                        senderId: users.find(u => u.username === 'Gemini AI')?.id,
+                        text: `Terima kasih atas pesan Anda, ${currentUser.username}! Ada lagi yang bisa saya bantu?`,
+                        timestamp: formatTime(new Date()),
+                        type: 'text'
+                    };
+                    messages[activeChatId].push(geminiMessage);
+                    renderMessages(activeChatId);
+                    chatToUpdate.lastMessage = `Gemini AI: ${geminiMessage.text}`;
+                    chatToUpdate.timestamp = formatTime(new Date());
+                    logActivity('Message', `Gemini AI replied to ${currentUser.username}.`, 'gemini_ai');
+                }, getRandomInt(1000, 3000));
+            }
         }
     }
 
@@ -1990,19 +2216,19 @@
         if (chat) {
             let partnerName = chat.name;
             let partnerAvatarContent;
-            let partnerStatus = 'Online'; // Default status
+            let partnerStatus = 'Online'; // Default status for groups
 
-            let targetUser = null; // Used for verified status
+            let targetUser = null; // Used for verified status if it's a direct chat
 
             if (chat.isGroup) {
-                partnerAvatarContent = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : getInitials(chat.name);
+                partnerAvatarContent = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : `<span>${getInitials(chat.name)}</span>`;
                 partnerStatus = `${chat.participants.length} Anggota`;
             } else {
                 const otherParticipantId = chat.participants.find(id => id !== currentUser.id);
                 const otherParticipant = users.find(u => u.id === otherParticipantId);
                 if (otherParticipant) {
                     partnerName = otherParticipant.username;
-                    partnerAvatarContent = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+                    partnerAvatarContent = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : `<span>${getInitials(otherParticipant.username)}</span>`;
                     partnerStatus = otherParticipant.isOnline ? 'Online' : 'Offline';
                     targetUser = otherParticipant;
                 }
@@ -2014,18 +2240,17 @@
                 const badge = document.createElement('i');
                 badge.classList.add('fas', 'fa-badge-check', 'admin-badge'); // Using admin-badge for style
                 chatPartnerNameDisplay.appendChild(badge);
-            } else if (chat.isAdminChat) { // For group chats explicitly marked as "admin chat"
-                 const badge = document.createElement('i');
-                badge.classList.add('fas', 'fa-check-circle', 'admin-badge');
-                chatPartnerNameDisplay.appendChild(badge);
             }
-
 
             chatPartnerAvatarDisplay.innerHTML = partnerAvatarContent;
             chatPartnerStatusDisplay.textContent = partnerStatus;
 
             showScreen('individual-chat-screen');
             renderMessages(chatId);
+            // Mark chat as read
+            chat.unreadCount = 0;
+            renderChatList(); // Update chat list to reflect read status
+            logActivity('Chat Open', `User ${currentUser.username} opened chat with ${chat.name}.`, currentUser.id);
         }
     }
 
@@ -2035,8 +2260,8 @@
      * @param {string|null} partnerChatId The ID of the chat to call, or null for general call screen.
      */
     function startCall(partnerChatId) {
-        let partnerName = 'Unknown';
-        let partnerAvatar = '';
+        let partnerName = 'Seseorang';
+        let partnerAvatar = '<i class="fas fa-phone"></i>';
         if (partnerChatId) {
             const chat = chats.find(c => c.id === partnerChatId);
             if (chat) {
@@ -2045,24 +2270,21 @@
                     const otherParticipant = users.find(u => u.id === otherParticipantId);
                     if (otherParticipant) {
                         partnerName = otherParticipant.username;
-                        partnerAvatar = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+                        partnerAvatar = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : `<span>${getInitials(otherParticipant.username)}</span>`;
                     }
                 } else { // Group call simulation
                     partnerName = chat.name;
                     partnerAvatar = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : `<i class="fas fa-users"></i>`; // Group icon
                 }
             }
-        } else {
-             // If called from bottom nav, simulate a general call initiation or a call to a default contact
-            partnerName = 'Seseorang...';
-            partnerAvatar = '<i class="fas fa-phone"></i>';
         }
-
 
         callingName.textContent = `Memanggil ${partnerName}...`;
         callingAvatar.innerHTML = partnerAvatar;
         callStatus.textContent = 'Menghubungkan...';
+        callTimerDisplay.textContent = ''; // Reset timer
         showScreen('call-screen');
+        logActivity('Call Initiated', `User ${currentUser.username} initiated call with ${partnerName}.`, currentUser.id);
 
         // Simulate call connection
         setTimeout(() => {
@@ -2071,6 +2293,15 @@
         setTimeout(() => {
             callStatus.textContent = `Panggilan dengan ${partnerName} Berlangsung`;
             activeCallsStat.textContent = parseInt(activeCallsStat.textContent) + 1;
+            callDuration = 0;
+            if (callTimerInterval) clearInterval(callTimerInterval);
+            callTimerInterval = setInterval(() => {
+                callDuration++;
+                const minutes = Math.floor(callDuration / 60);
+                const seconds = callDuration % 60;
+                callTimerDisplay.textContent = `(${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')})`;
+            }, 1000);
+            logActivity('Call Connected', `Call with ${partnerName} connected.`, currentUser.id);
         }, 5000);
     }
 
@@ -2078,12 +2309,16 @@
      * Ends the simulated call.
      */
     function endCall() {
+        if (callTimerInterval) clearInterval(callTimerInterval);
+        callTimerInterval = null;
+        logActivity('Call Ended', `Call ended after ${callDuration} seconds.`, currentUser.id);
         showNotificationModal(
             'Panggilan Diakhiri',
             'Panggilan Anda telah diakhiri.',
-            [{ text: 'OK', onClick: () => { showScreen('main-chat-list-screen'); } }]
+            [{ text: 'OK', onClick: () => { showScreen('main-chat-list-screen', true); } }]
         );
         activeCallsStat.textContent = Math.max(0, parseInt(activeCallsStat.textContent) - 1);
+        callDuration = 0;
     }
 
     // --- Status Screen Logic ---
@@ -2095,7 +2330,7 @@
 
         const myStatusUser = users.find(u => u.id === currentUser.id);
         if (myStatusUser) {
-            myStatusAvatar.innerHTML = myStatusUser.avatar ? `<img src="${myStatusUser.avatar}" alt="${myStatusUser.username}" />` : `<span>${getInitials(myStatusUser.username)}</span>`;
+            myStatusAvatar.innerHTML = myStatusUser.avatar ? `<img src="${myStatusUser.avatar}" />` : `<span>${getInitials(myStatusUser.username)}</span>`;
             // Add add status icon only if it's the current user's status
             if (!myStatusAvatar.querySelector('.add-status-icon')) {
                 const addIcon = document.createElement('div');
@@ -2108,6 +2343,7 @@
                         'Fitur tambah status belum diimplementasikan sepenuhnya. Anda bisa menambahkan logika untuk mengunggah gambar/teks status di sini.',
                         [{ text: 'OK', onClick: () => {} }]
                     );
+                    logActivity('Status', `User ${currentUser.username} attempted to add status.`, currentUser.id);
                 });
                 myStatusAvatar.appendChild(addIcon);
             }
@@ -2130,7 +2366,7 @@
             item.classList.add('status-item');
             item.dataset.userId = user.id;
 
-            const avatarContent = user.avatar ? `<img src="${user.avatar}" alt="${user.username}" />` : `<span>${getInitials(user.username)}</span>`;
+            const avatarContent = user.avatar ? `<img src="${user.avatar}" />` : `<span>${getInitials(user.username)}</span>`;
             const statusClass = status.isSeen ? '' : 'unseen';
 
             item.innerHTML = `
@@ -2157,6 +2393,7 @@
             `"${content}"\n\n(Simulasi: Ini akan menjadi penampil status layar penuh.)`,
             [{ text: 'OK', onClick: () => {} }]
         );
+        logActivity('Status View', `User ${currentUser.username} viewed ${users.find(u => u.id === userId)?.username}'s status.`, currentUser.id);
 
         // Mark status as seen (for demo, just update the local data)
         const statusToUpdate = statuses.find(s => s.userId === userId);
@@ -2180,10 +2417,31 @@
 
     /**
      * Renders the list of users for management in the admin panel.
+     * @param {string} searchTerm Optional search term to filter users.
      */
-    function renderUserManagementList() {
+    function renderUserManagementList(searchTerm = '') {
         userManagementList.innerHTML = ''; // Clear list
-        users.forEach(user => {
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+        let filteredUsers = users;
+        if (lowerCaseSearchTerm) {
+            filteredUsers = users.filter(user =>
+                user.username.toLowerCase().includes(lowerCaseSearchTerm) ||
+                user.id.toLowerCase().includes(lowerCaseSearchTerm)
+            );
+        }
+
+        // Sort by admin, then verified, then username
+        filteredUsers.sort((a, b) => {
+            if (a.isAdmin && !b.isAdmin) return -1;
+            if (!a.isAdmin && b.isAdmin) return 1;
+            if (a.isVerified && !b.isVerified) return -1;
+            if (!a.isVerified && b.isVerified) return 1;
+            return a.username.localeCompare(b.username);
+        });
+
+
+        filteredUsers.forEach(user => {
             if (user.id === currentUser.id) return; // Don't allow managing self
 
             const item = document.createElement('div');
@@ -2275,6 +2533,7 @@
                 });
             });
         }
+        updateAdminStats(); // Update pending reviews stat
     }
 
     /**
@@ -2288,13 +2547,13 @@
             alert('Username dan password pengguna baru tidak boleh kosong!');
             return;
         }
-        if (users.some(u => u.username === username)) {
+        if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
             alert('Username ini sudah ada.');
             return;
         }
 
         const newUser = {
-            id: 'u' + (users.length + 1).toString().padStart(3, '0'),
+            id: generateUniqueId('u'),
             username: username,
             password: password,
             isAdmin: false,
@@ -2304,12 +2563,40 @@
             banReason: null,
             banReviewRequested: false,
             reviewReason: null,
+            statusMessage: 'Hai, saya pengguna baru!',
             avatar: null
         };
         users.push(newUser);
         newUserUsernameInput.value = '';
         newUserPasswordInput.value = '';
-        alert('Pengguna baru berhasil ditambahkan!');
+
+        // Add a default chat for the new user with Annas if Annas exists
+        const annasId = users.find(u => u.username === 'Annas')?.id;
+        if (annasId) {
+            const newChatId = `chat_${annasId}_${newUser.id}`;
+            chats.push({
+                id: newChatId,
+                name: newUser.username,
+                lastMessage: `Halo Annas, ini ${newUser.username} baru saja bergabung!`,
+                timestamp: formatTime(new Date()),
+                unreadCount: 0, // No unread for the new user initially
+                isGroup: false,
+                isAdminChat: false,
+                avatar: newUser.avatar,
+                participants: [annasId, newUser.id]
+            });
+            messages[newChatId] = [
+                { senderId: 'info', text: `${newUser.username} bergabung.`, type: 'info', timestamp: formatTime(new Date()) },
+                { senderId: newUser.id, text: `Halo Annas, ini ${newUser.username} baru saja bergabung!`, type: 'text', timestamp: formatTime(new Date()) }
+            ];
+        }
+
+        showNotificationModal(
+            'Pengguna Ditambahkan',
+            `Pengguna "${username}" berhasil ditambahkan!`,
+            [{ text: 'OK', onClick: () => {} }]
+        );
+        logActivity('User Management', `Admin added new user: ${username}.`, currentUser.id);
         renderUserManagementList();
         updateAdminStats();
     }
@@ -2327,7 +2614,9 @@
                 `${user.username} sekarang ${user.isAdmin ? 'adalah Admin.' : 'bukan Admin lagi.'}`,
                 [{ text: 'OK', onClick: () => {} }]
             );
+            logActivity('User Management', `Admin status of ${user.username} changed to ${user.isAdmin}.`, currentUser.id);
             renderUserManagementList();
+            renderChatList(); // Refresh chat list in case admin badge needs update
         }
     }
 
@@ -2344,7 +2633,9 @@
                 `${user.username} sekarang ${user.isVerified ? 'terverifikasi.' : 'tidak terverifikasi lagi.'}`,
                 [{ text: 'OK', onClick: () => {} }]
             );
+            logActivity('User Management', `Verification status of ${user.username} changed to ${user.isVerified}.`, currentUser.id);
             renderUserManagementList();
+            renderChatList(); // Refresh chat list in case verified badge needs update
         }
     }
 
@@ -2365,24 +2656,28 @@
                     `${user.username} berhasil dibuka blokirnya.`,
                     [{ text: 'OK', onClick: () => {} }]
                 );
+                logActivity('User Management', `User ${user.username} unbanned.`, currentUser.id);
             } else {
-                const banReason = prompt(`Ban ${user.username}. Berikan alasan:`).trim();
-                if (banReason) {
+                const banReason = prompt(`Ban ${user.username}. Berikan alasan:`);
+                if (banReason && banReason.trim()) {
                     user.isBanned = true;
-                    user.banReason = banReason;
+                    user.banReason = banReason.trim();
                     user.banReviewRequested = false; // Reset if banned again
                     user.reviewReason = null;
                     showNotificationModal(
                         'Status Blokir Diperbarui',
-                        `${user.username} berhasil diblokir karena: ${banReason}`,
+                        `${user.username} berhasil diblokir karena: ${user.banReason}`,
                         [{ text: 'OK', onClick: () => {} }]
                     );
+                    logActivity('User Management', `User ${user.username} banned. Reason: "${user.banReason.substring(0, 50)}..."`, currentUser.id);
                 } else {
                     alert('Pembatalan pembekuan atau alasan tidak valid.');
+                    return;
                 }
             }
             renderUserManagementList();
             renderBannedReviewList(); // Update review list in case a banned user was there
+            updateAdminStats();
         }
     }
 
@@ -2396,28 +2691,32 @@
             `Apakah Anda yakin ingin menghapus pengguna ini (${users.find(u => u.id === userId)?.username})? Ini tidak dapat diurungkan.`,
             [
                 { text: 'Hapus', className: 'danger', onClick: () => {
-                    const initialUserCount = users.length;
+                    const userToDelete = users.find(u => u.id === userId);
+                    if (!userToDelete) return;
+
                     users = users.filter(user => user.id !== userId);
-                    if (users.length < initialUserCount) {
-                        showNotificationModal(
-                            'Berhasil',
-                            'Pengguna berhasil dihapus.',
-                            [{ text: 'OK', onClick: () => {} }]
-                        );
-                        // Also remove any chats they were the sole participant of (simplified)
-                        chats = chats.filter(chat => !chat.participants.includes(userId) || chat.participants.length > 1);
-                        renderUserManagementList();
-                        renderBannedReviewList();
-                        updateAdminStats();
-                        if (activeChatId && activeChatId === userId) {
-                            showScreen('main-chat-list-screen'); // If active chat was with deleted user
-                        }
-                    } else {
-                        showNotificationModal(
-                            'Gagal',
-                            'Gagal menghapus pengguna.',
-                            [{ text: 'OK', onClick: () => {} }]
-                        );
+
+                    // Also remove chats involving this user
+                    chats = chats.filter(chat => !chat.participants.includes(userId));
+                    // Remove messages of deleted user from all chats they participated in
+                    for (const chatId in messages) {
+                        messages[chatId] = messages[chatId].filter(msg => msg.senderId !== userId);
+                    }
+                    // Remove statuses of deleted user
+                    statuses = statuses.filter(status => status.userId !== userId);
+
+                    showNotificationModal(
+                        'Berhasil',
+                        `Pengguna "${userToDelete.username}" berhasil dihapus.`,
+                        [{ text: 'OK', onClick: () => {} }]
+                    );
+                    logActivity('User Management', `User ${userToDelete.username} permanently deleted.`, currentUser.id);
+
+                    renderUserManagementList();
+                    renderBannedReviewList();
+                    updateAdminStats();
+                    if (activeChatId && activeChatId === userId) {
+                        showScreen('main-chat-list-screen'); // If active chat was with deleted user
                     }
                 }},
                 { text: 'Batal', className: 'cancel', onClick: () => {} }
@@ -2443,17 +2742,22 @@
                     `Akun ${user.username} telah dibuka blokirnya oleh admin.`,
                     [{ text: 'OK', onClick: () => {} }]
                 );
+                logActivity('Ban Review', `Admin unbanned user ${user.username} after review.`, currentUser.id);
             } else if (action === 'reject') {
                 user.banReviewRequested = false; // Mark review as handled
+                // Optionally, add a new ban reason or append to existing one
+                user.banReason = user.banReason || 'Permintaan tinjauan ditolak.';
                 user.reviewReason = null; // Clear old review reason
                 showNotificationModal(
                     'Akun Tetap Diblokir',
                     `Permintaan tinjauan untuk ${user.username} ditolak. Akun tetap diblokir.`,
                     [{ text: 'OK', onClick: () => {} }]
                 );
+                logActivity('Ban Review', `Admin rejected ban review for ${user.username}. Account remains banned.`, currentUser.id);
             }
             renderBannedReviewList();
             renderUserManagementList(); // Update main user list
+            updateAdminStats();
         }
     }
 
@@ -2462,28 +2766,36 @@
      */
     function updateAdminStats() {
         totalUsersStat.textContent = users.length;
-        messagesTodayStat.textContent = Math.floor(Math.random() * 500) + 100; // Random number
+        messagesTodayStat.textContent = messagesTodayStat.textContent === '0' ? Math.floor(Math.random() * 500) + 100 : messagesTodayStat.textContent; // Initialize once, then increment
+        pendingReviewsStat.textContent = users.filter(u => u.isBanned && u.banReviewRequested).length;
         // activeCallsStat is updated by call functions
     }
 
     // --- Event Listeners ---
     authSubmitBtn.addEventListener('click', handleAuthSubmit);
     toggleAuthLink.addEventListener('click', toggleAuthMode);
+
     promoBannerCloseBtn?.addEventListener('click', function() {
         this.closest('#promo-banner').style.display = 'none';
+        logActivity('UI Interaction', 'Promo banner closed.', currentUser ? currentUser.id : 'anon');
     });
+
     fabChat.addEventListener('click', () => {
         showNotificationModal(
             'Buat Chat Baru',
             'Fitur ini akan memungkinkan Anda mencari dan memulai obrolan dengan pengguna atau grup baru. (Saat ini hanya demo UI)',
             [{ text: 'OK', onClick: () => {} }]
         );
+        logActivity('UI Interaction', 'FAB chat button clicked.', currentUser ? currentUser.id : 'anon');
     });
+
     backToChatsBtn.addEventListener('click', () => {
-        showScreen('main-chat-list-screen');
+        showScreen('main-chat-list-screen', true); // Transition back
         activeChatId = null;
         renderChatList(); // Refresh chat list
+        logActivity('Navigation', `User ${currentUser.username} returned to chat list.`, currentUser.id);
     });
+
     sendMessageBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -2501,6 +2813,7 @@
                 'Pilih chat untuk memulai panggilan.',
                 [{ text: 'OK', onClick: () => {} }]
             );
+            logActivity('Call', 'Call attempt failed: No active chat.', currentUser.id);
         }
     });
     endCallBtn.addEventListener('click', endCall);
@@ -2511,6 +2824,7 @@
             'Ketuk untuk memperbarui status Anda. (Fitur ini dapat dikembangkan untuk mengunggah gambar/teks status)',
             [{ text: 'OK', onClick: () => {} }]
         );
+        logActivity('Status', `User ${currentUser.username} attempted to update status.`, currentUser.id);
     });
 
     // Banned screen event listeners
@@ -2521,25 +2835,48 @@
             'Akun Anda masih diblokir. Anda dapat mengirimkan permintaan tinjauan.',
             [{ text: 'OK', onClick: () => {} }]
         );
+        logActivity('Banned Screen', 'User acknowledged banned status.', currentUser.id);
     });
     requestReviewBtn.addEventListener('click', () => {
         reviewReasonInput.style.display = 'block';
         sendReviewBtn.style.display = 'block';
         requestReviewBtn.style.display = 'none'; // Hide this button after showing input
+        logActivity('Banned Screen', 'User clicked "Send Reason for Review" button.', currentUser.id);
     });
     sendReviewBtn.addEventListener('click', sendBanReview);
 
     // Admin controls
     backFromAdminBtn.addEventListener('click', () => {
-        showScreen('main-chat-list-screen');
+        showScreen('main-chat-list-screen', true); // Transition back
+        logActivity('Navigation', `Admin ${currentUser.username} exited admin panel.`, currentUser.id);
     });
     addUserBtn.addEventListener('click', addUser);
+    adminSearchUser.addEventListener('input', (e) => {
+        renderUserManagementList(e.target.value);
+    });
+    searchIcon.addEventListener('click', () => {
+        const currentDisplay = chatSearchBar.style.display;
+        chatSearchBar.style.display = currentDisplay === 'none' ? 'block' : 'none';
+        chatSearchBar.value = ''; // Clear search on toggle
+        renderChatList(); // Re-render without filter
+        if (currentDisplay === 'none') {
+            chatSearchBar.focus();
+            logActivity('UI Interaction', 'Chat search bar opened.', currentUser.id);
+        } else {
+             logActivity('UI Interaction', 'Chat search bar closed.', currentUser.id);
+        }
+    });
+
+    chatSearchBar.addEventListener('input', (e) => {
+        renderChatList(e.target.value);
+    });
 
 
     // Bottom navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
             const targetScreenId = this.dataset.screen;
+            let navigateSuccess = true;
 
             // Handle admin access check
             if (targetScreenId === 'admin-control-screen') {
@@ -2549,48 +2886,56 @@
                         'Anda tidak memiliki izin untuk mengakses panel admin.',
                         [{ text: 'OK', onClick: () => {} }]
                     );
-                    // Prevent changing active state if unauthorized
-                    return;
+                    navigateSuccess = false;
+                } else {
+                    showScreen('admin-control-screen');
+                    renderUserManagementList();
+                    renderBannedReviewList();
+                    renderActivityLog(); // Render activity logs
+                    updateAdminStats();
+                    logActivity('Navigation', `Admin ${currentUser.username} navigated to Admin Panel.`, currentUser.id);
                 }
-                showScreen('admin-control-screen');
-                renderUserManagementList();
-                renderBannedReviewList();
-                updateAdminStats();
             } else if (targetScreenId === 'call-screen-nav') {
-                // If clicked from bottom nav, simulate a new call or show call history
                 startCall(null); // Pass null to indicate general call screen
+                logActivity('Navigation', `User ${currentUser.username} navigated to Call Screen.`, currentUser.id);
             } else if (targetScreenId === 'status-screen') {
                 showScreen('status-screen');
                 renderStatusList();
+                logActivity('Navigation', `User ${currentUser.username} navigated to Status Screen.`, currentUser.id);
             } else { // Default for chat list
                 showScreen('main-chat-list-screen');
                 renderChatList();
+                logActivity('Navigation', `User ${currentUser.username} navigated to Chat List.`, currentUser.id);
             }
 
-             // Update active class for nav items
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
+            // Update active class for nav items only if navigation was successful
+            if (navigateSuccess) {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            }
         });
     });
 
 
     // --- Initial Load Logic (Hacker Effect) ---
     document.addEventListener('DOMContentLoaded', () => {
+        // Initialize dummy data before hacker effect
+        initializeDummyData();
         loadingScreen.classList.add('show');
         const consoleTexts = [
-            'Initializing Annas Chat System...',
-            'Establishing secure connection to server [OK]',
-            'Authenticating core modules... [DONE]',
-            'Loading user profiles and chat history...',
-            'Decrypting sensitive data... [SUCCESS]',
-            'Scanning for vulnerabilities... [CLEAN]',
-            'Applying latest security patches...',
-            'Network stability check... [OPTIMAL]',
-            'Accessing global user database...',
-            'Verifying admin credentials...',
-            'Welcome, Operator. All systems operational.',
-            'Executing main application...',
-            'LOADING COMPLETE. ENJOY YOUR CHAT EXPERIENCE.',
+            'Initializing Annas Chat System v2.0...',
+            'Establishing quantum-encrypted connection... [OK]',
+            'Authenticating AI core and user matrix... [DONE]',
+            'Loading distributed user profiles and vast chat archives...',
+            'Decrypting sensitive data streams... [SUCCESS]',
+            'Scanning for zero-day exploits... [CLEAN]',
+            'Applying next-gen security protocols...',
+            'Network stability and bandwidth optimization... [OPTIMAL]',
+            'Accessing global multi-dimensional user database...',
+            'Verifying supreme admin credentials and Gemini AI integration...',
+            'Welcome, Operator. All systems operational. Prepare for quantum communication.',
+            'Executing main application interface...',
+            'LOADING COMPLETE. ENJOY YOUR ULTIMATE CHAT EXPERIENCE.',
             '', // Empty line for final effect
             'READY',
             ''
@@ -2598,8 +2943,8 @@
 
         let textIndex = 0;
         let charIndex = 0;
-        const typingSpeed = 30; // Faster typing
-        const lineDelay = 500; // Delay before next line
+        const typingSpeed = 20; // Even faster typing
+        const lineDelay = 300; // Shorter delay before next line
 
         function typeLine() {
             if (textIndex < consoleTexts.length) {
@@ -2612,6 +2957,7 @@
                     hackerConsole.textContent += '\n'; // New line after full line
                     charIndex = 0;
                     textIndex++;
+                    hackerConsole.scrollTop = hackerConsole.scrollHeight; // Scroll to bottom
                     setTimeout(typeLine, lineDelay);
                 }
             } else {
@@ -2622,7 +2968,7 @@
                         loadingScreen.style.display = 'none';
                         showScreen('auth-screen'); // Show auth screen after loading
                     }, { once: true });
-                }, 1500); // Wait a bit after typing finishes
+                }, 1000); // Wait a bit after typing finishes
             }
         }
         typeLine(); // Start the typing animation
