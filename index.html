@@ -3,24 +3,536 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Annas Chat - Versi Keren</title>
+  <title>Annas Chat - Versi Ultimate Kece</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    /* Your existing CSS (as provided in your previous message) goes here */
-    /* Make sure to include the new chat bubble CSS I provided previously */
+    :root {
+        --primary-dark: #0A0A0A;
+        --secondary-dark: #121212;
+        --accent-blue: #232D4B;
+        --accent-purple: #6F42C5;
+        --text-light: #E0E0E0;
+        --text-muted: #B0B0B0;
+        --border-color: #333;
+        --success-color: #28A745;
+        --danger-color: #DC3545;
+        --bubble-sent: linear-gradient(135deg, #6F42C5, #9D6EFD);
+        --bubble-received: #333;
+        --bg-chat-messages: url('https://i.ibb.co/L9p6qL0/chat-bg.jpg') no-repeat center center / cover; /* Example background, replace or remove */
+    }
 
-    /* Add this for basic message bubbles if not already present */
+    /* Base Styles */
+    body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--primary-dark);
+        color: var(--text-light);
+        overflow: hidden; /* Prevent scroll outside app */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    #app-container {
+        width: 100%;
+        max-width: 420px; /* Typical phone width */
+        height: 95vh;
+        max-height: 850px; /* Typical phone height */
+        background-color: var(--secondary-dark);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        border: 2px solid var(--border-color);
+    }
+
+    .app-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none; /* Hidden by default, shown by JS */
+        flex-direction: column;
+        background-color: var(--primary-dark);
+        transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        transform: translateX(100%); /* Start off-screen to the right */
+        opacity: 0;
+        z-index: 10;
+    }
+
+    .app-screen.show { /* For initial display without transition */
+        display: flex;
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .app-screen.active { /* For screens transitioned into view */
+        display: flex;
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    /* Common Components */
+    .card {
+        background-color: var(--accent-blue);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        text-align: center;
+        width: 80%;
+        max-width: 350px;
+        margin: auto; /* Center vertically and horizontally */
+    }
+
+    input[type="text"],
+    input[type="password"],
+    textarea {
+        width: calc(100% - 20px);
+        padding: 12px 10px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background-color: var(--secondary-dark);
+        color: var(--text-light);
+        font-size: 1em;
+        outline: none;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    textarea:focus {
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.2);
+    }
+
+    button {
+        background: linear-gradient(45deg, var(--accent-purple), #9D6EFD);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    .link {
+        color: var(--accent-purple);
+        cursor: pointer;
+        font-size: 0.9em;
+        margin-top: 15px;
+        transition: color 0.2s ease;
+    }
+
+    .link:hover {
+        color: #9D6EFD;
+        text-decoration: underline;
+    }
+
+    .message {
+        font-size: 0.9em;
+        margin-top: 10px;
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        border-radius: 50%;
+        background-color: var(--accent-blue);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 1.2em;
+        overflow: hidden;
+        position: relative; /* For online indicator */
+    }
+
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .icon-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.4em;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+        margin-left: 10px;
+        box-shadow: none; /* Override default button style */
+    }
+
+    .icon-btn:hover {
+        color: var(--accent-purple);
+        background-color: rgba(111, 66, 193, 0.1);
+        transform: scale(1.1);
+    }
+
+    .back-btn {
+        background: none;
+        border: none;
+        color: var(--text-light);
+        font-size: 1.5em;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        margin-right: 10px;
+        width: auto;
+        box-shadow: none;
+    }
+
+    .back-btn:hover {
+        background-color: rgba(255,255,255,0.1);
+        transform: translateX(-5px);
+    }
+
+    .admin-badge {
+        color: #1DA1F2; /* Twitter Blue */
+        font-size: 0.8em;
+        vertical-align: middle;
+        margin-left: 5px;
+    }
+
+    /* --- Loading Screen --- */
+    #loading-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #000;
+        color: #0F0;
+        font-family: 'Press Start 2P', cursive;
+        text-shadow: 0 0 5px #0F0;
+        font-size: 0.9em;
+        z-index: 100;
+        position: fixed;
+    }
+
+    .hacker-console {
+        white-space: pre-wrap;
+        margin-bottom: 20px;
+        max-height: 70%;
+        overflow-y: auto;
+        padding: 10px;
+        border: 1px solid #0F0;
+        width: 90%;
+        box-sizing: border-box;
+        text-align: left;
+        background-color: rgba(0,0,0,0.8);
+        box-shadow: 0 0 15px rgba(0,255,0,0.5);
+    }
+
+    .person-walk {
+        font-size: 3em;
+        animation: walk 1.5s infinite steps(2);
+    }
+
+    @keyframes walk {
+        0% { content: '🚶' }
+        50% { content: '🏃' }
+        100% { content: '🚶' }
+    }
+
+    /* --- Auth Screen --- */
+    #auth-screen {
+        justify-content: center;
+        align-items: center;
+    }
+
+    #auth-screen h2 {
+        color: var(--accent-purple);
+        margin-bottom: 25px;
+        font-size: 1.8em;
+    }
+
+    /* --- Main Chat List Screen --- */
+    #main-chat-list-screen {
+        padding-top: 60px; /* Space for header */
+        padding-bottom: 70px; /* Space for bottom nav */
+        position: relative;
+        overflow: hidden;
+    }
+
+    #main-chat-list-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: var(--secondary-dark);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 20;
+    }
+
+    .app-title {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: var(--accent-purple);
+    }
+
+    .header-icons .fas {
+        font-size: 1.4em;
+        margin-left: 20px;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .header-icons .fas:hover {
+        color: var(--text-light);
+        transform: scale(1.1);
+    }
+
+    #promo-banner {
+        background: linear-gradient(90deg, #3C1E70, #5A3A9D);
+        color: var(--text-light);
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #promo-banner .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2em;
+        cursor: pointer;
+        margin-left: 15px;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+        box-shadow: none;
+        padding: 0;
+        transform: none;
+    }
+
+    #promo-banner .close-btn:hover {
+        opacity: 1;
+    }
+
+    #chat-list-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 10px;
+        padding-bottom: 10px; /* Adjust for scrollbar */
+        position: relative; /* For scroll effects */
+    }
+
+    .chat-list-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 8px;
+        background-color: var(--secondary-dark);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .chat-list-item:hover {
+        background-color: var(--accent-blue);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .chat-list-item .avatar {
+        margin-right: 15px;
+        position: relative;
+    }
+
+    .chat-list-item .avatar .online-indicator {
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+        width: 12px;
+        height: 12px;
+        background-color: var(--success-color);
+        border-radius: 50%;
+        border: 2px solid var(--secondary-dark);
+        box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    }
+
+    .chat-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .chat-name {
+        font-weight: 700;
+        font-size: 1.1em;
+        color: var(--text-light);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+    }
+
+    .last-message {
+        font-size: 0.9em;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 3px;
+    }
+
+    .chat-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-left: 15px;
+        flex-shrink: 0;
+    }
+
+    .timestamp {
+        font-size: 0.8em;
+        color: var(--text-muted);
+        margin-bottom: 5px;
+    }
+
+    .unread-count {
+        background-color: var(--accent-purple);
+        color: white;
+        font-size: 0.75em;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 12px;
+        min-width: 20px;
+        text-align: center;
+    }
+
+    #fab-chat {
+        position: absolute;
+        bottom: 90px; /* Above bottom nav */
+        right: 25px;
+        background: linear-gradient(45deg, #1DA1F2, #4A90E2); /* Lighter blue for FAB */
+        color: white;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5em;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        z-index: 30;
+    }
+
+    #fab-chat:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    /* --- Individual Chat Screen --- */
+    #individual-chat-screen {
+        padding-top: 60px; /* Space for header */
+        padding-bottom: 70px; /* Space for input area + bottom nav */
+    }
+
+    #chat-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: var(--secondary-dark);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 20;
+    }
+
+    .chat-partner-avatar {
+        width: 45px;
+        height: 45px;
+        min-width: 45px;
+        border-radius: 50%;
+        background-color: var(--accent-blue);
+        margin-right: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        color: var(--text-light);
+        font-size: 1.1em;
+        overflow: hidden;
+    }
+
+    .chat-partner-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .chat-partner-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .chat-partner-name {
+        font-weight: 700;
+        font-size: 1.1em;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+    }
+
+    .chat-partner-status {
+        font-size: 0.85em;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .chat-options {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+    }
+
     #chat-messages {
         flex: 1;
         overflow-y: auto;
         padding: 20px;
         display: flex;
         flex-direction: column;
-        gap: 10px; /* Space between bubbles */
-        background: url('https://i.ibb.co/L9p6qL0/chat-bg.jpg') no-repeat center center / cover; /* Example background, replace with your own or remove */
+        gap: 10px;
+        background: var(--bg-chat-messages);
         position: relative;
         min-height: 0;
+        scroll-behavior: smooth;
     }
 
     .message-bubble {
@@ -95,6 +607,10 @@
         box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
         flex-shrink: 0;
         gap: 10px;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        box-sizing: border-box;
     }
     #chat-input-area textarea {
         flex-grow: 1;
@@ -230,6 +746,7 @@
         flex-direction: column;
         background: var(--primary-dark);
         padding: 20px;
+        padding-top: 80px; /* Space for header if exists */
     }
     #status-screen .status-header {
         display: flex;
@@ -237,6 +754,15 @@
         margin-bottom: 25px;
         padding-bottom: 15px;
         border-bottom: 1px solid var(--border-color);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        background-color: var(--secondary-dark);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 20;
     }
     #status-screen .status-header .my-status-avatar {
         width: 70px;
@@ -293,6 +819,9 @@
     #status-list {
         flex: 1;
         overflow-y: auto;
+        width: 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
     }
     .status-section-title {
         font-size: 1.1em;
@@ -354,14 +883,34 @@
     #admin-control-screen {
         flex-direction: column;
         background: var(--primary-dark);
+        padding-top: 60px; /* Header space */
+    }
+
+    #admin-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: var(--secondary-dark);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 20;
+    }
+    #admin-header .app-title {
+        font-size: 1.4em;
+    }
+
+
+    #admin-content {
+        flex: 1;
+        overflow-y: auto;
         padding: 20px;
+        padding-bottom: 80px; /* Space for bottom nav */
     }
-    #admin-control-screen h2 {
-        font-size: 1.8em;
-        color: var(--accent-purple);
-        margin-bottom: 25px;
-        text-align: center;
-    }
+
     .admin-section {
         background: var(--secondary-dark);
         border-radius: 15px;
@@ -395,6 +944,8 @@
     .admin-list-item .user-info {
         display: flex;
         align-items: center;
+        flex-grow: 1;
+        min-width: 0;
     }
     .admin-list-item .user-info .avatar {
         width: 40px;
@@ -413,6 +964,11 @@
     .admin-list-item .user-info .username {
         font-weight: 600;
         color: var(--text-light);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
     }
     .admin-list-item .admin-actions button {
         background: none;
@@ -420,13 +976,16 @@
         color: var(--danger-color);
         padding: 8px 12px;
         border-radius: 10px;
-        font-size: 0.9em;
+        font-size: 0.8em;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-left: 10px;
+        margin-left: 8px;
         box-shadow: none; /* Override default button style */
+        flex-shrink: 0;
     }
-    .admin-list-item .admin-actions button.promote {
+    .admin-list-item .admin-actions button.promote,
+    .admin-list-item .admin-actions button.unban,
+    .admin-list-item .admin-actions button.verified {
         border-color: var(--success-color);
         color: var(--success-color);
     }
@@ -435,17 +994,29 @@
         color: white;
         transform: translateY(-2px);
     }
-    .admin-list-item .admin-actions button.promote:hover {
+    .admin-list-item .admin-actions button.promote:hover,
+    .admin-list-item .admin-actions button.unban:hover,
+    .admin-list-item .admin-actions button.verified:hover {
         background-color: var(--success-color);
         color: white;
     }
+    .admin-list-item .admin-actions button.ban {
+        border-color: #f7b731; /* Warning color */
+        color: #f7b731;
+    }
+    .admin-list-item .admin-actions button.ban:hover {
+        background-color: #f7b731;
+        color: white;
+    }
+
+
     .admin-form label {
         display: block;
         margin-bottom: 8px;
         color: var(--text-muted);
         font-size: 0.9em;
     }
-    .admin-form input, .admin-form select {
+    .admin-form input, .admin-form select, .admin-form textarea {
         width: calc(100% - 22px); /* Adjust for padding */
         padding: 10px 10px;
         margin-bottom: 15px;
@@ -454,6 +1025,7 @@
         background-color: var(--accent-blue);
         color: var(--text-light);
         font-size: 1em;
+        box-sizing: border-box;
     }
     .admin-form button {
         margin-top: 10px;
@@ -466,140 +1038,328 @@
         transform: translateY(-3px);
     }
 
+    /* Banned Screen */
+    #banned-screen {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    #banned-screen .card {
+        background-color: #2e0c0c;
+        border: 1px solid var(--danger-color);
+    }
+    #banned-screen h2 {
+        color: var(--danger-color);
+        margin-bottom: 15px;
+    }
+    #banned-screen p {
+        color: var(--text-light);
+        margin-bottom: 20px;
+    }
+    #banned-screen .banned-options button {
+        margin: 10px;
+        padding: 10px 20px;
+        font-size: 0.9em;
+    }
+    #banned-screen #review-reason-input {
+        margin-top: 20px;
+        height: 80px;
+        resize: vertical;
+        display: none; /* Hidden by default */
+    }
+    #banned-screen #send-review-btn {
+        margin-top: 10px;
+        display: none; /* Hidden by default */
+        background: var(--success-color);
+    }
+    #banned-screen #send-review-btn:hover {
+        background: #218838;
+    }
+
+
+    /* Notification Modal (Simple overlay for messages) */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background-color: var(--secondary-dark);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        text-align: center;
+        max-width: 80%;
+        min-width: 300px;
+        transform: translateY(-20px);
+        opacity: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+    .modal-overlay.visible .modal-content {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    .modal-content h3 {
+        color: var(--accent-purple);
+        margin-bottom: 20px;
+        font-size: 1.5em;
+    }
+    .modal-content p {
+        color: var(--text-light);
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+    .modal-content button {
+        margin: 0 10px;
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    .modal-content button.cancel {
+        background: var(--danger-color);
+    }
+
+
+    /* --- Bottom Navigation --- */
+    #bottom-nav {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background-color: var(--secondary-dark);
+        padding: 10px 0;
+        border-top: 1px solid var(--border-color);
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+        z-index: 30;
+    }
+
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 0.8em;
+        transition: color 0.2s ease, transform 0.2s ease;
+        padding: 5px 0;
+        min-width: 70px;
+    }
+
+    .nav-item i {
+        font-size: 1.6em;
+        margin-bottom: 5px;
+        transition: color 0.2s ease;
+    }
+
+    .nav-item span {
+        font-weight: 600;
+    }
+
+    .nav-item.active {
+        color: var(--accent-purple);
+        transform: translateY(-3px);
+    }
+
+    .nav-item.active i {
+        color: var(--accent-purple);
+    }
+
+    .nav-item:hover {
+        color: var(--text-light);
+    }
+
+    .nav-item:hover i {
+        color: var(--text-light);
+    }
   </style>
 </head>
 <body>
 
-  <div id="loading-screen" class="app-screen show">
-    <div class="hacker-console"></div>
-    <div class="person-walk"></div>
-  </div>
-
-  <div id="auth-screen" class="app-screen">
-    <div class="card">
-      <h2 id="auth-title">Login</h2>
-      <input type="text" id="username" placeholder="Username" />
-      <input type="password" id="password" placeholder="Password" />
-      <button id="auth-submit-btn">Login</button>
-      <p class="link" id="toggle-auth">Belum punya akun? Daftar di sini</p>
-      <p class="message" id="auth-message" style="display: none;"></p>
-    </div>
-  </div>
-
-  <div id="main-chat-list-screen" class="app-screen">
-    <div id="main-chat-list-header">
-      <span class="app-title">Annas Chat</span>
-      <div class="header-icons">
-        <i class="fas fa-search"></i>
-        <i class="fas fa-ellipsis-v"></i>
-      </div>
-    </div>
-    <div id="promo-banner">
-      <span>Mulai percakapan baru dengan Annas!</span>
-      <button class="close-btn">&times;</button>
-    </div>
-    <div id="chat-list-content">
-      </div>
-    <div id="fab-chat"><i class="fas fa-comment-dots"></i></div>
+  <div id="app-container">
+    <div id="loading-screen" class="app-screen show">
+      <div class="hacker-console"></div>
+      <div class="person-walk"></div>
     </div>
 
-  <div id="individual-chat-screen" class="app-screen">
-    <div id="chat-header">
-      <button class="back-btn" id="back-to-chats"><i class="fas fa-arrow-left"></i></button>
-      <div class="chat-partner-avatar" id="chat-partner-avatar-display"></div>
-      <div class="chat-partner-info">
-        <div class="chat-partner-name" id="chat-partner-name-display"></div>
-        <div class="chat-partner-status" id="chat-partner-status-display">Online</div>
-      </div>
-      <div class="chat-options">
-        <button class="icon-btn" id="call-btn"><i class="fas fa-video"></i></button>
-        <button class="icon-btn"><i class="fas fa-phone-alt"></i></button>
-        <button class="icon-btn"><i class="fas fa-ellipsis-v"></i></button>
-      </div>
-    </div>
-
-    <div id="chat-messages">
-      </div>
-
-    <div id="chat-input-area">
-      <button class="icon-btn"><i class="fas fa-grin"></i></button>
-      <textarea id="chat-input" placeholder="Pesan"></textarea>
-      <button class="icon-btn"><i class="fas fa-paperclip"></i></button>
-      <button class="icon-btn"><i class="fas fa-camera"></i></button>
-      <button id="send-message-btn"><i class="fas fa-paper-plane"></i></button>
-    </div>
-  </div>
-
-  <div id="call-screen" class="app-screen">
-    <div class="call-info">
-        <div class="call-avatar" id="calling-avatar"></div>
-        <h2 id="calling-name">Memanggil...</h2>
-        <p id="call-status">Menghubungkan...</p>
-    </div>
-    <div class="call-controls">
-        <button><i class="fas fa-microphone-slash"></i></button>
-        <button><i class="fas fa-volume-up"></i></button>
-        <button class="end-call" id="end-call-btn"><i class="fas fa-phone-slash"></i></button>
-    </div>
-  </div>
-
-  <div id="status-screen" class="app-screen">
-    <div class="status-header">
-        <div class="my-status-avatar">
-            <span>AZ</span> <div class="add-status-icon"><i class="fas fa-plus"></i></div>
-        </div>
-        <div class="status-text">
-            <h3>Status Saya</h3>
-            <p>Ketuk untuk memperbarui status</p>
+    <div id="notification-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="notification-title">Pemberitahuan</h3>
+            <p id="notification-message">Ini adalah pesan pemberitahuan.</p>
+            <div id="notification-buttons">
+                <button id="notification-ok-btn">OK</button>
+            </div>
         </div>
     </div>
 
-    <div class="status-section-title">Pembaruan Terbaru</div>
-    <div id="status-list">
-        </div>
-  </div>
+    <div id="auth-screen" class="app-screen">
+      <div class="card">
+        <h2 id="auth-title">Login</h2>
+        <input type="text" id="username" placeholder="Username" />
+        <input type="password" id="password" placeholder="Password" />
+        <button id="auth-submit-btn">Login</button>
+        <p class="link" id="toggle-auth">Belum punya akun? Daftar di sini</p>
+        <p class="message" id="auth-message" style="display: none;"></p>
+      </div>
+    </div>
 
-  <div id="admin-control-screen" class="app-screen">
-      <div id="admin-header">
-            <button class="back-btn" id="back-from-admin"><i class="fas fa-arrow-left"></i></button>
-            <h2 class="app-title" style="flex-grow: 1; text-align: center;">Kontrol Admin</h2>
-            <div style="width: 2em;"></div> </div>
-      <div class="admin-section">
-          <h3>Manajemen Pengguna</h3>
-          <div class="admin-list" id="user-management-list">
-              </div>
-          <div class="admin-form">
-              <label for="new-user-username">Tambah Pengguna Baru:</label>
-              <input type="text" id="new-user-username" placeholder="Username" />
-              <input type="password" id="new-user-password" placeholder="Password" />
-              <button id="add-user-btn">Tambah Pengguna</button>
+    <div id="banned-screen" class="app-screen">
+        <div class="card">
+            <h2><i class="fas fa-exclamation-triangle" style="color: var(--danger-color); margin-right: 10px;"></i>Akun Anda di-banned</h2>
+            <p id="banned-reason-display">Akun Anda telah diblokir karena melanggar kebijakan kami.</p>
+            <p>Silakan tinjau alasan pemblokiran atau hubungi dukungan.</p>
+            <div class="banned-options">
+                <button id="banned-ok-btn">OK, Tutup</button>
+                <button id="request-review-btn">Kirim Alasan Tinjauan</button>
+            </div>
+            <textarea id="review-reason-input" placeholder="Jelaskan mengapa Anda yakin akun Anda harus diaktifkan kembali..."></textarea>
+            <button id="send-review-btn">Kirim Permintaan Tinjauan</button>
+        </div>
+    </div>
+
+    <div id="main-chat-list-screen" class="app-screen">
+      <div id="main-chat-list-header">
+        <span class="app-title">Annas Chat</span>
+        <div class="header-icons">
+          <i class="fas fa-search"></i>
+          <i class="fas fa-ellipsis-v"></i>
+        </div>
+      </div>
+      <div id="promo-banner">
+        <span>Mulai percakapan baru dengan Annas!</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div id="chat-list-content">
+        </div>
+      <div id="fab-chat"><i class="fas fa-comment-dots"></i></div>
+    </div>
+
+    <div id="individual-chat-screen" class="app-screen">
+      <div id="chat-header">
+        <button class="back-btn" id="back-to-chats"><i class="fas fa-arrow-left"></i></button>
+        <div class="chat-partner-avatar" id="chat-partner-avatar-display"></div>
+        <div class="chat-partner-info">
+          <div class="chat-partner-name" id="chat-partner-name-display"></div>
+          <div class="chat-partner-status" id="chat-partner-status-display"></div>
+        </div>
+        <div class="chat-options">
+          <button class="icon-btn" id="call-btn"><i class="fas fa-video"></i></button>
+          <button class="icon-btn"><i class="fas fa-phone-alt"></i></button>
+          <button class="icon-btn"><i class="fas fa-ellipsis-v"></i></button>
+        </div>
+      </div>
+
+      <div id="chat-messages">
+        </div>
+
+      <div id="chat-input-area">
+        <button class="icon-btn"><i class="fas fa-grin"></i></button>
+        <textarea id="chat-input" placeholder="Pesan"></textarea>
+        <button class="icon-btn"><i class="fas fa-paperclip"></i></button>
+        <button class="icon-btn"><i class="fas fa-camera"></i></button>
+        <button id="send-message-btn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <div id="call-screen" class="app-screen">
+      <div class="call-info">
+          <div class="call-avatar" id="calling-avatar"></div>
+          <h2 id="calling-name">Memanggil...</h2>
+          <p id="call-status">Menghubungkan...</p>
+      </div>
+      <div class="call-controls">
+          <button><i class="fas fa-microphone-slash"></i></button>
+          <button><i class="fas fa-volume-up"></i></button>
+          <button class="end-call" id="end-call-btn"><i class="fas fa-phone-slash"></i></button>
+      </div>
+    </div>
+
+    <div id="status-screen" class="app-screen">
+      <div class="status-header">
+          <div class="my-status-avatar">
+              <span>AZ</span>
+              <div class="add-status-icon"><i class="fas fa-plus"></i></div>
+          </div>
+          <div class="status-text">
+              <h3>Status Saya</h3>
+              <p>Ketuk untuk memperbarui status</p>
           </div>
       </div>
 
-      <div class="admin-section">
-          <h3>Statistik Aplikasi (Simulasi)</h3>
-          <p>Total Pengguna: <span id="total-users-stat">0</span></p>
-          <p>Pesan Terkirim Hari Ini: <span id="messages-today-stat">0</span></p>
-          <p>Panggilan Berlangsung: <span id="active-calls-stat">0</span></p>
-      </div>
-  </div>
+      <div class="status-section-title">Pembaruan Terbaru</div>
+      <div id="status-list">
+          </div>
+    </div>
 
-  <div id="bottom-nav">
-    <div class="nav-item active" data-screen="main-chat-list-screen">
-      <i class="fas fa-comment"></i>
-      <span>Chat</span>
+    <div id="admin-control-screen" class="app-screen">
+        <div id="admin-header">
+              <button class="back-btn" id="back-from-admin"><i class="fas fa-arrow-left"></i></button>
+              <h2 class="app-title" style="flex-grow: 1; text-align: center;">Kontrol Admin</h2>
+              <div style="width: 2em;"></div>
+        </div>
+        <div id="admin-content">
+            <div class="admin-section">
+                <h3>Manajemen Pengguna</h3>
+                <div class="admin-list" id="user-management-list">
+                    </div>
+                <div class="admin-form">
+                    <label for="new-user-username">Tambah Pengguna Baru:</label>
+                    <input type="text" id="new-user-username" placeholder="Username" />
+                    <input type="password" id="new-user-password" placeholder="Password" />
+                    <button id="add-user-btn">Tambah Pengguna</button>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h3>Permintaan Tinjauan Akun Banned</h3>
+                <div class="admin-list" id="banned-review-list">
+                    <p class="text-muted" style="text-align: center;" id="no-review-requests">Tidak ada permintaan tinjauan.</p>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h3>Statistik Aplikasi (Simulasi)</h3>
+                <p>Total Pengguna: <span id="total-users-stat">0</span></p>
+                <p>Pesan Terkirim Hari Ini: <span id="messages-today-stat">0</span></p>
+                <p>Panggilan Berlangsung: <span id="active-calls-stat">0</span></p>
+            </div>
+        </div>
     </div>
-    <div class="nav-item" data-screen="call-screen-nav">
-      <i class="fas fa-phone"></i>
-      <span>Panggilan</span>
-    </div>
-    <div class="nav-item" data-screen="status-screen">
-      <i class="fas fa-circle-notch"></i>
-      <span>Status</span>
-    </div>
-    <div class="nav-item" data-screen="admin-control-screen" id="admin-nav-item">
-      <i class="fas fa-user-shield"></i>
-      <span>Admin</span>
+
+    <div id="bottom-nav">
+      <div class="nav-item active" data-screen="main-chat-list-screen">
+        <i class="fas fa-comment"></i>
+        <span>Chat</span>
+      </div>
+      <div class="nav-item" data-screen="call-screen-nav">
+        <i class="fas fa-phone"></i>
+        <span>Panggilan</span>
+      </div>
+      <div class="nav-item" data-screen="status-screen">
+        <i class="fas fa-circle-notch"></i>
+        <span>Status</span>
+      </div>
+      <div class="nav-item" data-screen="admin-control-screen" id="admin-nav-item">
+        <i class="fas fa-user-shield"></i>
+        <span>Admin</span>
+      </div>
     </div>
   </div>
 
@@ -607,21 +1367,21 @@
     // --- Global State / Data (Simplified for client-side demo) ---
     // User data, mimicking a simple database
     let users = [
-        { id: 'u001', username: 'Annas', password: '123', isAdmin: true, statusMessage: 'Aktif dan siap membantu!', avatar: null },
-        { id: 'u002', username: 'Royalty', password: '123', isAdmin: false, statusMessage: '☕ Ngoding santai...', avatar: null },
-        { id: 'u003', username: 'Dlimas Alfiansyah', password: '123', isAdmin: false, statusMessage: 'Sedang mencari inspirasi...', avatar: null },
-        { id: 'u004', username: 'Nauvalsada Unesa', password: '123', isAdmin: false, statusMessage: 'Lagi fokus belajar.', avatar: null },
-        { id: 'u005', username: '+6289534479382', password: '123', isAdmin: false, statusMessage: 'Halo dunia!', avatar: null },
-        { id: 'u006', username: 'Gemar Kode', password: '123', isAdmin: false, statusMessage: 'Diskusi tentang teknologi.', avatar: null },
-        { id: 'u007', username: 'Suka Koding 2', password: '123', isAdmin: false, statusMessage: 'Membangun sesuatu yang keren.', avatar: null },
-        { id: 'u008', username: 'Komunitas IT Indonesia', password: '123', isAdmin: false, statusMessage: 'Berbagi ilmu.', avatar: null },
-        { id: 'u009', username: '+6288902885836', password: '123', isAdmin: false, statusMessage: 'Kopi dan kode.', avatar: null },
-        { id: 'u010', username: 'PHP Web Developer', password: '123', isAdmin: false, statusMessage: 'Framework favorit: Laravel.', avatar: null },
-        { id: 'u011', username: 'Member Baru 1', password: '123', isAdmin: false, statusMessage: 'Hai, saya baru!', avatar: null },
-        { id: 'u012', username: 'Member Baru 2', password: '123', isAdmin: false, statusMessage: 'Apa kabar?', avatar: null },
-        { id: 'u013', username: 'Member Baru 3', password: '123', isAdmin: false, statusMessage: 'Selamat datang!', avatar: null },
-        { id: 'u014', username: 'Tester Admin', password: '123', isAdmin: true, statusMessage: 'Menguji sistem.', avatar: null },
-        { id: 'u015', username: 'Guest User', password: '123', isAdmin: false, statusMessage: 'Sedang offline.', avatar: null },
+        { id: 'u001', username: 'Annas', password: '123', isAdmin: true, isVerified: true, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Aktif dan siap membantu!', avatar: 'https://i.ibb.co/CQt5p1p/annas-avatar.jpg' },
+        { id: 'u002', username: 'Royalty', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: '☕ Ngoding santai...', avatar: null },
+        { id: 'u003', username: 'Dlimas Alfiansyah', password: '123', isAdmin: false, isVerified: true, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Sedang mencari inspirasi...', avatar: null },
+        { id: 'u004', username: 'Nauvalsada Unesa', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Lagi fokus belajar.', avatar: null },
+        { id: 'u005', username: '+6289534479382', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Halo dunia!', avatar: null },
+        { id: 'u006', username: 'Gemar Kode', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Diskusi tentang teknologi.', avatar: null },
+        { id: 'u007', username: 'Suka Koding 2', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Membangun sesuatu yang keren.', avatar: null },
+        { id: 'u008', username: 'Komunitas IT Indonesia', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Berbagi ilmu.', avatar: null },
+        { id: 'u009', username: '+6288902885836', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Kopi dan kode.', avatar: null },
+        { id: 'u010', username: 'PHP Web Developer', password: '123', isAdmin: false, isVerified: true, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Framework favorit: Laravel.', avatar: null },
+        { id: 'u011', username: 'Member Baru 1', password: '123', isAdmin: false, isVerified: false, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Hai, saya baru!', avatar: null },
+        { id: 'u012', username: 'Member Banned', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: true, banReason: 'Pelanggaran ketentuan layanan berulang.', banReviewRequested: false, reviewReason: null, statusMessage: 'Akun Anda diblokir.', avatar: null },
+        { id: 'u013', username: 'Request Review', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: true, banReason: 'Konten tidak pantas.', banReviewRequested: true, reviewReason: 'Saya tidak sengaja mengunggah konten tersebut, mohon berikan saya kesempatan kedua.', statusMessage: 'Akun Anda diblokir.', avatar: null },
+        { id: 'u014', username: 'Tester Admin', password: '123', isAdmin: true, isVerified: true, isOnline: true, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Menguji sistem.', avatar: null },
+        { id: 'u015', username: 'Guest User', password: '123', isAdmin: false, isVerified: false, isOnline: false, isBanned: false, banReason: null, banReviewRequested: false, reviewReason: null, statusMessage: 'Sedang offline.', avatar: null },
     ];
 
     let chats = [
@@ -632,7 +1392,7 @@
             timestamp: '15.44',
             unreadCount: 926,
             isGroup: true,
-            isAdmin: false,
+            isAdminChat: false, // For chat-specific admin status (e.g. group admin)
             avatar: null,
             participants: ['u001', 'u002', 'u003', 'u004', 'u005']
         },
@@ -643,7 +1403,7 @@
             timestamp: '15.12',
             unreadCount: 19,
             isGroup: true,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u002', 'u006', 'u007']
         },
@@ -654,7 +1414,7 @@
             timestamp: '14.17',
             unreadCount: 0,
             isGroup: false,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u005']
         },
@@ -665,7 +1425,7 @@
             timestamp: '14',
             unreadCount: 14,
             isGroup: true,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u008', 'u009']
         },
@@ -676,7 +1436,7 @@
             timestamp: '09.37',
             unreadCount: 2,
             isGroup: true,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u003', 'u006']
         },
@@ -687,7 +1447,7 @@
             timestamp: '9',
             unreadCount: 9,
             isGroup: false,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u007']
         },
@@ -698,7 +1458,7 @@
             timestamp: '7',
             unreadCount: 0,
             isGroup: true,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u008']
         },
@@ -709,7 +1469,7 @@
             timestamp: '25/06',
             unreadCount: 0,
             isGroup: false,
-            isAdmin: true, // Example: Mark Annas as admin for the badge
+            isAdminChat: true, // Example: Mark Annas as admin for the badge
             avatar: null,
             participants: ['u001']
         },
@@ -720,7 +1480,7 @@
             timestamp: '24/06',
             unreadCount: 0,
             isGroup: false,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u009']
         },
@@ -731,7 +1491,7 @@
             timestamp: '0',
             unreadCount: 0,
             isGroup: true,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u010']
         },
@@ -742,7 +1502,7 @@
             timestamp: '0',
             unreadCount: 0,
             isGroup: false,
-            isAdmin: false,
+            isAdminChat: false,
             avatar: null,
             participants: ['u001', 'u011']
         }
@@ -798,11 +1558,11 @@
     };
 
     let statuses = [
-        { userId: 'u001', username: 'Annas', avatar: null, time: 'Baru saja', isSeen: false, content: 'Semangat ngoding hari ini! #developerlife' },
-        { userId: 'u002', username: 'Royalty', avatar: null, time: '10 menit yang lalu', isSeen: true, content: 'Kopi pagi terbaik ☕' },
-        { userId: 'u003', username: 'Dlimas Alfiansyah', avatar: null, time: '30 menit yang lalu', isSeen: false, content: 'Mood bagus buat koding hari ini.' },
-        { userId: 'u004', username: 'Nauvalsada Unesa', avatar: null, time: '1 jam yang lalu', isSeen: true, content: 'Belajar hal baru setiap hari.' },
-        { userId: 'u005', username: '+6289534479382', avatar: null, time: '2 jam yang lalu', isSeen: false, content: 'Jalan-jalan sore.' },
+        { id: 's001', userId: 'u001', username: 'Annas', avatar: 'https://i.ibb.co/CQt5p1p/annas-avatar.jpg', time: 'Baru saja', isSeen: false, content: 'Semangat ngoding hari ini! #developerlife' },
+        { id: 's002', userId: 'u002', username: 'Royalty', avatar: null, time: '10 menit yang lalu', isSeen: true, content: 'Kopi pagi terbaik ☕' },
+        { id: 's003', userId: 'u003', username: 'Dlimas Alfiansyah', avatar: null, time: '30 menit yang lalu', isSeen: false, content: 'Mood bagus buat koding hari ini.' },
+        { id: 's004', userId: 'u004', username: 'Nauvalsada Unesa', avatar: null, time: '1 jam yang lalu', isSeen: true, content: 'Belajar hal baru setiap hari.' },
+        { id: 's005', userId: 'u005', username: '+6289534479382', avatar: null, time: '2 jam yang lalu', isSeen: false, content: 'Jalan-jalan sore.' },
     ];
 
 
@@ -811,6 +1571,8 @@
 
     // --- DOM Elements ---
     const loadingScreen = document.getElementById('loading-screen');
+    const hackerConsole = document.querySelector('.hacker-console');
+
     const authScreen = document.getElementById('auth-screen');
     const authTitle = document.getElementById('auth-title');
     const usernameInput = document.getElementById('username');
@@ -818,6 +1580,13 @@
     const authSubmitBtn = document.getElementById('auth-submit-btn');
     const toggleAuthLink = document.getElementById('toggle-auth');
     const authMessage = document.getElementById('auth-message');
+
+    const bannedScreen = document.getElementById('banned-screen');
+    const bannedReasonDisplay = document.getElementById('banned-reason-display');
+    const bannedOkBtn = document.getElementById('banned-ok-btn');
+    const requestReviewBtn = document.getElementById('request-review-btn');
+    const reviewReasonInput = document.getElementById('review-reason-input');
+    const sendReviewBtn = document.getElementById('send-review-btn');
 
     const mainChatListScreen = document.getElementById('main-chat-list-screen');
     const chatListContent = document.getElementById('chat-list-content');
@@ -857,36 +1626,67 @@
     const totalUsersStat = document.getElementById('total-users-stat');
     const messagesTodayStat = document.getElementById('messages-today-stat');
     const activeCallsStat = document.getElementById('active-calls-stat');
+    const bannedReviewList = document.getElementById('banned-review-list');
+    const noReviewRequestsMsg = document.getElementById('no-review-requests');
+
+    const notificationModal = document.getElementById('notification-modal');
+    const notificationTitle = document.getElementById('notification-title');
+    const notificationMessage = document.getElementById('notification-message');
+    const notificationButtons = document.getElementById('notification-buttons');
+    const notificationOkBtn = document.getElementById('notification-ok-btn');
 
 
     // --- Helper Functions ---
+    /**
+     * Extracts initials from a name.
+     * @param {string} name
+     * @returns {string} Initials
+     */
     function getInitials(name) {
         if (!name) return '';
-        const parts = name.split(' ');
+        const parts = name.split(' ').filter(part => part.length > 0);
         if (parts.length > 1) {
-            return (parts[0][0] + parts[1][0]).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
         }
         return parts[0][0].toUpperCase();
     }
 
+    /**
+     * Displays a specific app screen and manages transitions.
+     * @param {string} screenId The ID of the screen to show.
+     */
     function showScreen(screenId) {
         const screens = document.querySelectorAll('.app-screen');
         screens.forEach(screen => {
             if (screen.id === screenId) {
-                screen.style.display = 'flex'; // Make target visible
+                screen.style.display = 'flex';
                 setTimeout(() => {
-                    screen.classList.add('active'); // Trigger transition
+                    screen.classList.add('active');
                 }, 10);
             } else {
                 screen.classList.remove('active');
-                // Give a small delay before hiding to allow transition out
                 setTimeout(() => {
                     screen.style.display = 'none';
-                }, 400); // Should match CSS transition duration
+                }, 400); // Match CSS transition duration
+            }
+        });
+
+        // Update bottom navigation active state
+        document.querySelectorAll('.nav-item').forEach(nav => {
+            nav.classList.remove('active');
+            if (nav.dataset.screen === screenId || (screenId === 'call-screen' && nav.dataset.screen === 'call-screen-nav')) {
+                nav.classList.add('active');
+            } else if (screenId === 'individual-chat-screen' && nav.dataset.screen === 'main-chat-list-screen') {
+                nav.classList.add('active'); // Keep chat tab active when in individual chat
             }
         });
     }
 
+    /**
+     * Displays an authentication message.
+     * @param {string} message The message to display.
+     * @param {boolean} isError True if it's an error message, false for success.
+     */
     function displayAuthMessage(message, isError = true) {
         authMessage.textContent = message;
         authMessage.style.color = isError ? 'var(--danger-color)' : 'var(--success-color)';
@@ -896,9 +1696,47 @@
         }, 3000);
     }
 
+    /**
+     * Shows a custom notification modal.
+     * @param {string} title
+     * @param {string} message
+     * @param {Array<{text: string, className?: string, onClick: Function}>} buttons Array of button configurations.
+     */
+    function showNotificationModal(title, message, buttons) {
+        notificationTitle.textContent = title;
+        notificationMessage.textContent = message;
+        notificationButtons.innerHTML = ''; // Clear previous buttons
+
+        buttons.forEach(btnConfig => {
+            const button = document.createElement('button');
+            button.textContent = btnConfig.text;
+            if (btnConfig.className) {
+                button.classList.add(btnConfig.className);
+            }
+            button.addEventListener('click', () => {
+                btnConfig.onClick();
+                hideNotificationModal();
+            });
+            notificationButtons.appendChild(button);
+        });
+
+        notificationModal.classList.add('visible');
+    }
+
+    /**
+     * Hides the custom notification modal.
+     */
+    function hideNotificationModal() {
+        notificationModal.classList.remove('visible');
+    }
+
+
     // --- Authentication Logic ---
     let isLoginMode = true; // State for login/register form
 
+    /**
+     * Toggles between login and register modes.
+     */
     function toggleAuthMode() {
         isLoginMode = !isLoginMode;
         authTitle.textContent = isLoginMode ? 'Login' : 'Daftar';
@@ -909,6 +1747,9 @@
         authMessage.style.display = 'none';
     }
 
+    /**
+     * Handles the login/registration submission.
+     */
     function handleAuthSubmit() {
         const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
@@ -922,12 +1763,30 @@
             const user = users.find(u => u.username === username && u.password === password);
             if (user) {
                 currentUser = user;
-                displayAuthMessage(`Selamat datang, ${currentUser.username}!`, false);
-                setTimeout(() => {
-                    showScreen('main-chat-list-screen');
-                    renderChatList();
-                    updateAdminControlsVisibility();
-                }, 500);
+                if (currentUser.isBanned) {
+                    bannedReasonDisplay.textContent = `Akun Anda telah diblokir karena: ${currentUser.banReason || 'Melanggar ketentuan layanan.'}`;
+                    // Show or hide review input based on whether a review has been requested
+                    if (currentUser.banReviewRequested) {
+                        reviewReasonInput.style.display = 'none';
+                        sendReviewBtn.style.display = 'none';
+                        showNotificationModal(
+                            'Permintaan Tinjauan Akun',
+                            'Permintaan tinjauan Anda sedang diproses oleh admin. Mohon tunggu balasan.',
+                            [{ text: 'OK', onClick: () => { showScreen('banned-screen'); } }]
+                        );
+                    } else {
+                        reviewReasonInput.style.display = 'block';
+                        sendReviewBtn.style.display = 'block';
+                    }
+                    showScreen('banned-screen');
+                } else {
+                    displayAuthMessage(`Selamat datang, ${currentUser.username}!`, false);
+                    setTimeout(() => {
+                        showScreen('main-chat-list-screen');
+                        renderChatList();
+                        updateAdminControlsVisibility();
+                    }, 500);
+                }
             } else {
                 displayAuthMessage('Username atau password salah.');
             }
@@ -941,8 +1800,14 @@
                     username: username,
                     password: password,
                     isAdmin: false,
+                    isVerified: false,
+                    isOnline: true,
+                    isBanned: false,
+                    banReason: null,
+                    banReviewRequested: false,
+                    reviewReason: null,
                     statusMessage: 'Hai, saya pengguna baru!',
-                    avatar: null
+                    avatar: null // Default avatar
                 };
                 users.push(newUser);
                 displayAuthMessage('Pendaftaran berhasil! Silakan login.', false);
@@ -952,7 +1817,36 @@
         }
     }
 
+    // --- Banned Screen Logic ---
+    function sendBanReview() {
+        if (!currentUser) return;
+        const reason = reviewReasonInput.value.trim();
+        if (reason.length < 20) {
+            alert('Mohon berikan alasan tinjauan yang lebih detail (minimal 20 karakter).');
+            return;
+        }
+
+        currentUser.banReviewRequested = true;
+        currentUser.reviewReason = reason;
+        reviewReasonInput.value = '';
+        reviewReasonInput.style.display = 'none';
+        sendReviewBtn.style.display = 'none';
+
+        showNotificationModal(
+            'Permintaan Terkirim',
+            'Permintaan tinjauan akun Anda telah berhasil dikirim. Admin akan meninjaunya segera.',
+            [{ text: 'OK', onClick: () => { /* No specific action, stay on banned screen */ } }]
+        );
+        // Admin will see this request in their panel
+        if (currentUser.isAdmin) {
+             renderBannedReviewList(); // Update admin panel if current user is admin and viewing it
+        }
+    }
+
     // --- Chat List Logic ---
+    /**
+     * Renders the list of chats on the main chat screen.
+     */
     function renderChatList() {
         chatListContent.innerHTML = ''; // Clear previous list
         // Filter chats to only show those where currentUser is a participant, or all if admin
@@ -960,14 +1854,20 @@
             ? chats
             : chats.filter(chat => chat.participants.includes(currentUser.id));
 
+        if (accessibleChats.length === 0) {
+            chatListContent.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 50px;">Tidak ada obrolan. Buat obrolan baru dengan FAB di pojok kanan bawah!</p>';
+            return;
+        }
+
         accessibleChats.forEach(chat => {
             const item = document.createElement('div');
             item.classList.add('chat-list-item');
             item.dataset.chatId = chat.id;
 
-            // Determine display name and avatar for direct chats vs groups
+            // Determine display name, avatar, and online status for direct chats vs groups
             let displayName = chat.name;
             let displayAvatarContent;
+            let showOnlineIndicator = false;
 
             if (chat.isGroup) {
                 displayAvatarContent = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : getInitials(chat.name);
@@ -978,19 +1878,23 @@
                 if (otherParticipant) {
                     displayName = otherParticipant.username;
                     displayAvatarContent = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+                    showOnlineIndicator = otherParticipant.isOnline;
                 } else {
                     // Fallback if participant not found (shouldn't happen with proper data)
                     displayAvatarContent = getInitials(chat.name);
                 }
             }
 
-
             item.innerHTML = `
-                <div class="avatar">${displayAvatarContent}</div>
+                <div class="avatar">
+                    ${displayAvatarContent}
+                    ${showOnlineIndicator ? '<div class="online-indicator"></div>' : ''}
+                </div>
                 <div class="chat-info">
                     <div class="chat-name">
                         ${displayName}
-                        ${chat.isAdmin ? '<i class="fas fa-check-circle admin-badge"></i>' : ''}
+                        ${chat.isAdminChat ? '<i class="fas fa-check-circle admin-badge"></i>' : ''}
+                        ${users.find(u => u.username === displayName)?.isVerified ? '<i class="fas fa-badge-check admin-badge"></i>' : ''}
                     </div>
                     <div class="last-message">${chat.lastMessage}</div>
                 </div>
@@ -1006,9 +1910,18 @@
     }
 
     // --- Individual Chat Logic ---
+    /**
+     * Renders messages for the currently active chat.
+     * @param {string} chatId The ID of the chat.
+     */
     function renderMessages(chatId) {
         chatMessagesContainer.innerHTML = ''; // Clear previous messages
         const chatMessages = messages[chatId] || [];
+
+        if (chatMessages.length === 0) {
+            chatMessagesContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 50px;">Belum ada pesan di obrolan ini. Mulai percakapan Anda!</p>';
+            return;
+        }
 
         chatMessages.forEach(msg => {
             const messageElement = document.createElement('div');
@@ -1028,7 +1941,7 @@
             }
 
             messageElement.innerHTML = `
-                ${msg.type !== 'info' && activeChatId.includes('chat_') ? `<span class="message-sender">${senderName}</span>` : ''}
+                ${msg.type !== 'info' && messages[chatId][0]?.type !== 'info' && chat.isGroup ? `<span class="message-sender">${senderName}</span>` : ''}
                 <p>${msg.text}</p>
                 <span class="message-timestamp">${msg.timestamp}</span>
             `;
@@ -1038,9 +1951,12 @@
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
 
+    /**
+     * Sends a message in the active chat.
+     */
     function sendMessage() {
         const messageText = chatInput.value.trim();
-        if (messageText && activeChatId) {
+        if (messageText && activeChatId && currentUser) {
             if (!messages[activeChatId]) {
                 messages[activeChatId] = [];
             }
@@ -1052,16 +1968,31 @@
             });
             chatInput.value = '';
             renderMessages(activeChatId);
+
+            // Update last message and timestamp in chat list (for demo)
+            const chatToUpdate = chats.find(c => c.id === activeChatId);
+            if (chatToUpdate) {
+                chatToUpdate.lastMessage = currentUser.username + ': ' + messageText;
+                chatToUpdate.timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                // Simulate unread count increase for the other party if it was a real app
+            }
+            // No need to re-render chat list immediately unless going back to it.
         }
     }
 
+    /**
+     * Opens an individual chat screen.
+     * @param {string} chatId The ID of the chat to open.
+     */
     function openIndividualChat(chatId) {
         activeChatId = chatId;
         const chat = chats.find(c => c.id === chatId);
         if (chat) {
             let partnerName = chat.name;
             let partnerAvatarContent;
-            let partnerStatus = 'Online';
+            let partnerStatus = 'Online'; // Default status
+
+            let targetUser = null; // Used for verified status
 
             if (chat.isGroup) {
                 partnerAvatarContent = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : getInitials(chat.name);
@@ -1072,22 +2003,23 @@
                 if (otherParticipant) {
                     partnerName = otherParticipant.username;
                     partnerAvatarContent = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
-                    partnerStatus = otherParticipant.statusMessage || 'Online';
+                    partnerStatus = otherParticipant.isOnline ? 'Online' : 'Offline';
+                    targetUser = otherParticipant;
                 }
             }
 
-            chatPartnerNameDisplay.textContent = partnerName;
-            // Dynamically add admin badge if applicable for the chat itself (e.g. if a group is admin-managed)
-            if (chat.isAdmin) {
-                if (!chatPartnerNameDisplay.querySelector('.admin-badge')) {
-                    const badge = document.createElement('i');
-                    badge.classList.add('fas', 'fa-check-circle', 'admin-badge');
-                    chatPartnerNameDisplay.appendChild(badge);
-                }
-            } else {
-                const existingBadge = chatPartnerNameDisplay.querySelector('.admin-badge');
-                if (existingBadge) existingBadge.remove();
+            chatPartnerNameDisplay.innerHTML = partnerName;
+            // Add verified badge if applicable
+            if (targetUser && targetUser.isVerified) {
+                const badge = document.createElement('i');
+                badge.classList.add('fas', 'fa-badge-check', 'admin-badge'); // Using admin-badge for style
+                chatPartnerNameDisplay.appendChild(badge);
+            } else if (chat.isAdminChat) { // For group chats explicitly marked as "admin chat"
+                 const badge = document.createElement('i');
+                badge.classList.add('fas', 'fa-check-circle', 'admin-badge');
+                chatPartnerNameDisplay.appendChild(badge);
             }
+
 
             chatPartnerAvatarDisplay.innerHTML = partnerAvatarContent;
             chatPartnerStatusDisplay.textContent = partnerStatus;
@@ -1098,23 +2030,34 @@
     }
 
     // --- Call Screen Logic ---
+    /**
+     * Simulates starting a call.
+     * @param {string|null} partnerChatId The ID of the chat to call, or null for general call screen.
+     */
     function startCall(partnerChatId) {
         let partnerName = 'Unknown';
         let partnerAvatar = '';
         if (partnerChatId) {
             const chat = chats.find(c => c.id === partnerChatId);
-            if (chat && !chat.isGroup) { // Only direct calls for now
-                const otherParticipantId = chat.participants.find(id => id !== currentUser.id);
-                const otherParticipant = users.find(u => u.id === otherParticipantId);
-                if (otherParticipant) {
-                    partnerName = otherParticipant.username;
-                    partnerAvatar = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+            if (chat) {
+                if (!chat.isGroup) {
+                    const otherParticipantId = chat.participants.find(id => id !== currentUser.id);
+                    const otherParticipant = users.find(u => u.id === otherParticipantId);
+                    if (otherParticipant) {
+                        partnerName = otherParticipant.username;
+                        partnerAvatar = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+                    }
+                } else { // Group call simulation
+                    partnerName = chat.name;
+                    partnerAvatar = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : `<i class="fas fa-users"></i>`; // Group icon
                 }
-            } else if (chat && chat.isGroup) { // For groups, just use group name/avatar
-                partnerName = chat.name;
-                partnerAvatar = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : getInitials(chat.name);
             }
+        } else {
+             // If called from bottom nav, simulate a general call initiation or a call to a default contact
+            partnerName = 'Seseorang...';
+            partnerAvatar = '<i class="fas fa-phone"></i>';
         }
+
 
         callingName.textContent = `Memanggil ${partnerName}...`;
         callingAvatar.innerHTML = partnerAvatar;
@@ -1131,27 +2074,51 @@
         }, 5000);
     }
 
+    /**
+     * Ends the simulated call.
+     */
     function endCall() {
-        alert('Panggilan diakhiri.');
-        showScreen('main-chat-list-screen'); // Return to main chat list
+        showNotificationModal(
+            'Panggilan Diakhiri',
+            'Panggilan Anda telah diakhiri.',
+            [{ text: 'OK', onClick: () => { showScreen('main-chat-list-screen'); } }]
+        );
         activeCallsStat.textContent = Math.max(0, parseInt(activeCallsStat.textContent) - 1);
     }
 
     // --- Status Screen Logic ---
+    /**
+     * Renders the list of user statuses.
+     */
     function renderStatusList() {
         statusListContainer.innerHTML = ''; // Clear previous list
 
         const myStatusUser = users.find(u => u.id === currentUser.id);
         if (myStatusUser) {
-            myStatusAvatar.innerHTML = myStatusUser.avatar ? `<img src="${myStatusUser.avatar}" alt="${myStatusUser.username}" />` : getInitials(myStatusUser.username);
-            myStatusAvatar.querySelector('.add-status-icon').style.display = 'flex'; // Ensure plus icon is visible
+            myStatusAvatar.innerHTML = myStatusUser.avatar ? `<img src="${myStatusUser.avatar}" alt="${myStatusUser.username}" />` : `<span>${getInitials(myStatusUser.username)}</span>`;
+            // Add add status icon only if it's the current user's status
+            if (!myStatusAvatar.querySelector('.add-status-icon')) {
+                const addIcon = document.createElement('div');
+                addIcon.classList.add('add-status-icon');
+                addIcon.innerHTML = '<i class="fas fa-plus"></i>';
+                addIcon.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent myStatusAvatar click event
+                    showNotificationModal(
+                        'Tambah Status Baru',
+                        'Fitur tambah status belum diimplementasikan sepenuhnya. Anda bisa menambahkan logika untuk mengunggah gambar/teks status di sini.',
+                        [{ text: 'OK', onClick: () => {} }]
+                    );
+                });
+                myStatusAvatar.appendChild(addIcon);
+            }
+
             myStatusAvatar.nextElementSibling.querySelector('h3').textContent = 'Status Saya';
             myStatusAvatar.nextElementSibling.querySelector('p').textContent = myStatusUser.statusMessage || 'Ketuk untuk memperbarui status';
         }
 
         const recentStatuses = statuses.filter(s => s.userId !== currentUser.id); // Exclude own status for 'Recent Updates'
         if (recentStatuses.length === 0) {
-            statusListContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 30px;">Tidak ada pembaruan status terbaru.</p>';
+            statusListContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 30px;">Tidak ada pembaruan status terbaru dari kontak Anda.</p>';
             return;
         }
 
@@ -1163,7 +2130,7 @@
             item.classList.add('status-item');
             item.dataset.userId = user.id;
 
-            const avatarContent = user.avatar ? `<img src="${user.avatar}" alt="${user.username}" />` : getInitials(user.username);
+            const avatarContent = user.avatar ? `<img src="${user.avatar}" alt="${user.username}" />` : `<span>${getInitials(user.username)}</span>`;
             const statusClass = status.isSeen ? '' : 'unseen';
 
             item.innerHTML = `
@@ -1179,9 +2146,18 @@
         });
     }
 
+    /**
+     * Simulates viewing a user's status.
+     * @param {string} userId The ID of the user whose status is being viewed.
+     * @param {string} content The content of the status.
+     */
     function viewStatus(userId, content) {
-        alert(`Status dari ${users.find(u => u.id === userId)?.username}:\n\n"${content}"\n\n(Simulasi: Klik OK untuk melihat status selanjutnya atau keluar.)`);
-        // In a real app, this would open a full-screen status viewer
+        showNotificationModal(
+            `Status dari ${users.find(u => u.id === userId)?.username}`,
+            `"${content}"\n\n(Simulasi: Ini akan menjadi penampil status layar penuh.)`,
+            [{ text: 'OK', onClick: () => {} }]
+        );
+
         // Mark status as seen (for demo, just update the local data)
         const statusToUpdate = statuses.find(s => s.userId === userId);
         if (statusToUpdate) {
@@ -1191,6 +2167,9 @@
     }
 
     // --- Admin Control Logic ---
+    /**
+     * Updates the visibility of the admin navigation item.
+     */
     function updateAdminControlsVisibility() {
         if (currentUser && currentUser.isAdmin) {
             adminNavItem.style.display = 'flex';
@@ -1199,6 +2178,9 @@
         }
     }
 
+    /**
+     * Renders the list of users for management in the admin panel.
+     */
     function renderUserManagementList() {
         userManagementList.innerHTML = ''; // Clear list
         users.forEach(user => {
@@ -1209,21 +2191,40 @@
             item.innerHTML = `
                 <div class="user-info">
                     <div class="avatar">${user.avatar ? `<img src="${user.avatar}" />` : getInitials(user.username)}</div>
-                    <span class="username">${user.username} ${user.isAdmin ? '(Admin)' : ''}</span>
+                    <span class="username">
+                        ${user.username}
+                        ${user.isAdmin ? '(Admin)' : ''}
+                        ${user.isVerified ? '<i class="fas fa-badge-check admin-badge"></i>' : ''}
+                        ${user.isBanned ? '<i class="fas fa-ban" style="color: var(--danger-color); margin-left: 5px;"></i>' : ''}
+                    </span>
                 </div>
                 <div class="admin-actions">
                     <button class="promote" data-user-id="${user.id}">${user.isAdmin ? 'Demote' : 'Promote'}</button>
+                    <button class="verified" data-user-id="${user.id}">${user.isVerified ? 'Unverify' : 'Verify'}</button>
+                    <button class="ban" data-user-id="${user.id}">${user.isBanned ? 'Unban' : 'Ban'}</button>
                     <button class="delete" data-user-id="${user.id}">Hapus</button>
                 </div>
             `;
             userManagementList.appendChild(item);
         });
 
-        // Add event listeners after rendering
+        // Attach event listeners to newly created buttons
         userManagementList.querySelectorAll('.admin-actions .promote').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const userId = e.target.dataset.userId;
                 toggleUserAdminStatus(userId);
+            });
+        });
+        userManagementList.querySelectorAll('.admin-actions .verified').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = e.target.dataset.userId;
+                toggleUserVerifiedStatus(userId);
+            });
+        });
+        userManagementList.querySelectorAll('.admin-actions .ban').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = e.target.dataset.userId;
+                toggleUserBanStatus(userId);
             });
         });
         userManagementList.querySelectorAll('.admin-actions .delete').forEach(btn => {
@@ -1234,6 +2235,51 @@
         });
     }
 
+    /**
+     * Renders the list of banned account review requests.
+     */
+    function renderBannedReviewList() {
+        bannedReviewList.innerHTML = ''; // Clear list
+        const reviewRequests = users.filter(u => u.isBanned && u.banReviewRequested);
+
+        if (reviewRequests.length === 0) {
+            noReviewRequestsMsg.style.display = 'block';
+        } else {
+            noReviewRequestsMsg.style.display = 'none';
+            reviewRequests.forEach(user => {
+                const item = document.createElement('div');
+                item.classList.add('admin-list-item');
+                item.innerHTML = `
+                    <div class="user-info">
+                        <div class="avatar">${user.avatar ? `<img src="${user.avatar}" />` : getInitials(user.username)}</div>
+                        <span class="username">${user.username} <i class="fas fa-flag" style="color: orange; margin-left: 5px;"></i></span>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="unban" data-user-id="${user.id}" data-action="unban">Buka Blokir</button>
+                        <button class="ban" data-user-id="${user.id}" data-action="reject">Tolak Akun</button>
+                    </div>
+                `;
+                const reasonDiv = document.createElement('div');
+                reasonDiv.style.cssText = 'width: 100%; font-size: 0.85em; color: var(--text-muted); margin-top: 5px; padding-left: 65px; box-sizing: border-box; word-wrap: break-word;';
+                reasonDiv.innerHTML = `**Alasan:** ${user.reviewReason || 'Tidak ada alasan diberikan.'}`;
+                item.appendChild(reasonDiv);
+
+                bannedReviewList.appendChild(item);
+            });
+
+            bannedReviewList.querySelectorAll('.admin-actions button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.target.dataset.userId;
+                    const action = e.target.dataset.action;
+                    handleBanReview(userId, action);
+                });
+            });
+        }
+    }
+
+    /**
+     * Adds a new user to the system.
+     */
     function addUser() {
         const username = newUserUsernameInput.value.trim();
         const password = newUserPasswordInput.value.trim();
@@ -1252,7 +2298,12 @@
             username: username,
             password: password,
             isAdmin: false,
-            statusMessage: 'Pengguna baru!',
+            isVerified: false,
+            isOnline: false,
+            isBanned: false,
+            banReason: null,
+            banReviewRequested: false,
+            reviewReason: null,
             avatar: null
         };
         users.push(newUser);
@@ -1263,38 +2314,154 @@
         updateAdminStats();
     }
 
+    /**
+     * Toggles a user's admin status.
+     * @param {string} userId
+     */
     function toggleUserAdminStatus(userId) {
-        const userIndex = users.findIndex(u => u.id === userId);
-        if (userIndex > -1) {
-            users[userIndex].isAdmin = !users[userIndex].isAdmin;
-            alert(`${users[userIndex].username} sekarang ${users[userIndex].isAdmin ? 'adalah Admin' : 'bukan Admin lagi'}.`);
+        const user = users.find(u => u.id === userId);
+        if (user) {
+            user.isAdmin = !user.isAdmin;
+            showNotificationModal(
+                'Status Admin Diperbarui',
+                `${user.username} sekarang ${user.isAdmin ? 'adalah Admin.' : 'bukan Admin lagi.'}`,
+                [{ text: 'OK', onClick: () => {} }]
+            );
             renderUserManagementList();
         }
     }
 
-    function deleteUser(userId) {
-        if (confirm(`Apakah Anda yakin ingin menghapus pengguna ini? Ini tidak dapat diurungkan.`)) {
-            const initialUserCount = users.length;
-            users = users.filter(user => user.id !== userId);
-            if (users.length < initialUserCount) {
-                alert('Pengguna berhasil dihapus.');
-                // Also remove any chats they were the sole participant of (simplified)
-                chats = chats.filter(chat => !chat.participants.includes(userId) || chat.participants.length > 1);
-
-                renderUserManagementList();
-                updateAdminStats();
-                if (activeChatId && activeChatId === userId) {
-                    showScreen('main-chat-list-screen'); // If active chat was with deleted user
-                }
-            } else {
-                alert('Gagal menghapus pengguna.');
-            }
+    /**
+     * Toggles a user's verified status.
+     * @param {string} userId
+     */
+    function toggleUserVerifiedStatus(userId) {
+        const user = users.find(u => u.id === userId);
+        if (user) {
+            user.isVerified = !user.isVerified;
+            showNotificationModal(
+                'Status Verifikasi Diperbarui',
+                `${user.username} sekarang ${user.isVerified ? 'terverifikasi.' : 'tidak terverifikasi lagi.'}`,
+                [{ text: 'OK', onClick: () => {} }]
+            );
+            renderUserManagementList();
         }
     }
 
+    /**
+     * Toggles a user's banned status.
+     * @param {string} userId
+     */
+    function toggleUserBanStatus(userId) {
+        const user = users.find(u => u.id === userId);
+        if (user) {
+            if (user.isBanned) {
+                user.isBanned = false;
+                user.banReason = null;
+                user.banReviewRequested = false;
+                user.reviewReason = null;
+                showNotificationModal(
+                    'Status Blokir Diperbarui',
+                    `${user.username} berhasil dibuka blokirnya.`,
+                    [{ text: 'OK', onClick: () => {} }]
+                );
+            } else {
+                const banReason = prompt(`Ban ${user.username}. Berikan alasan:`).trim();
+                if (banReason) {
+                    user.isBanned = true;
+                    user.banReason = banReason;
+                    user.banReviewRequested = false; // Reset if banned again
+                    user.reviewReason = null;
+                    showNotificationModal(
+                        'Status Blokir Diperbarui',
+                        `${user.username} berhasil diblokir karena: ${banReason}`,
+                        [{ text: 'OK', onClick: () => {} }]
+                    );
+                } else {
+                    alert('Pembatalan pembekuan atau alasan tidak valid.');
+                }
+            }
+            renderUserManagementList();
+            renderBannedReviewList(); // Update review list in case a banned user was there
+        }
+    }
+
+    /**
+     * Deletes a user from the system.
+     * @param {string} userId
+     */
+    function deleteUser(userId) {
+        showNotificationModal(
+            'Konfirmasi Hapus Pengguna',
+            `Apakah Anda yakin ingin menghapus pengguna ini (${users.find(u => u.id === userId)?.username})? Ini tidak dapat diurungkan.`,
+            [
+                { text: 'Hapus', className: 'danger', onClick: () => {
+                    const initialUserCount = users.length;
+                    users = users.filter(user => user.id !== userId);
+                    if (users.length < initialUserCount) {
+                        showNotificationModal(
+                            'Berhasil',
+                            'Pengguna berhasil dihapus.',
+                            [{ text: 'OK', onClick: () => {} }]
+                        );
+                        // Also remove any chats they were the sole participant of (simplified)
+                        chats = chats.filter(chat => !chat.participants.includes(userId) || chat.participants.length > 1);
+                        renderUserManagementList();
+                        renderBannedReviewList();
+                        updateAdminStats();
+                        if (activeChatId && activeChatId === userId) {
+                            showScreen('main-chat-list-screen'); // If active chat was with deleted user
+                        }
+                    } else {
+                        showNotificationModal(
+                            'Gagal',
+                            'Gagal menghapus pengguna.',
+                            [{ text: 'OK', onClick: () => {} }]
+                        );
+                    }
+                }},
+                { text: 'Batal', className: 'cancel', onClick: () => {} }
+            ]
+        );
+    }
+
+    /**
+     * Handles reviewing a banned user's request.
+     * @param {string} userId
+     * @param {'unban'|'reject'} action
+     */
+    function handleBanReview(userId, action) {
+        const user = users.find(u => u.id === userId);
+        if (user) {
+            if (action === 'unban') {
+                user.isBanned = false;
+                user.banReason = null;
+                user.banReviewRequested = false;
+                user.reviewReason = null;
+                showNotificationModal(
+                    'Akun Dibuka!',
+                    `Akun ${user.username} telah dibuka blokirnya oleh admin.`,
+                    [{ text: 'OK', onClick: () => {} }]
+                );
+            } else if (action === 'reject') {
+                user.banReviewRequested = false; // Mark review as handled
+                user.reviewReason = null; // Clear old review reason
+                showNotificationModal(
+                    'Akun Tetap Diblokir',
+                    `Permintaan tinjauan untuk ${user.username} ditolak. Akun tetap diblokir.`,
+                    [{ text: 'OK', onClick: () => {} }]
+                );
+            }
+            renderBannedReviewList();
+            renderUserManagementList(); // Update main user list
+        }
+    }
+
+    /**
+     * Updates simulated admin statistics.
+     */
     function updateAdminStats() {
         totalUsersStat.textContent = users.length;
-        // These are very basic simulations
         messagesTodayStat.textContent = Math.floor(Math.random() * 500) + 100; // Random number
         // activeCallsStat is updated by call functions
     }
@@ -1306,7 +2473,11 @@
         this.closest('#promo-banner').style.display = 'none';
     });
     fabChat.addEventListener('click', () => {
-        alert('Fitur "Buat Chat Baru" belum diimplementasikan sepenuhnya. Anda bisa menambahkan logika untuk memilih kontak di sini.');
+        showNotificationModal(
+            'Buat Chat Baru',
+            'Fitur ini akan memungkinkan Anda mencari dan memulai obrolan dengan pengguna atau grup baru. (Saat ini hanya demo UI)',
+            [{ text: 'OK', onClick: () => {} }]
+        );
     });
     backToChatsBtn.addEventListener('click', () => {
         showScreen('main-chat-list-screen');
@@ -1322,23 +2493,41 @@
     });
 
     callButton.addEventListener('click', () => {
-        // Find the user/group ID from the current active chat
         if (activeChatId) {
             startCall(activeChatId);
         } else {
-            alert('Pilih chat untuk memulai panggilan.');
+            showNotificationModal(
+                'Panggilan Gagal',
+                'Pilih chat untuk memulai panggilan.',
+                [{ text: 'OK', onClick: () => {} }]
+            );
         }
     });
     endCallBtn.addEventListener('click', endCall);
 
     myStatusAvatar?.addEventListener('click', () => {
-        alert('Ketuk untuk memperbarui status Anda. (Fitur ini dapat dikembangkan untuk mengunggah gambar/teks status)');
-    });
-    addStatusIcon?.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent myStatusAvatar click event
-        alert('Tambah status baru! (Anda bisa menambahkan logika untuk membuat status baru di sini)');
+        showNotificationModal(
+            'Perbarui Status',
+            'Ketuk untuk memperbarui status Anda. (Fitur ini dapat dikembangkan untuk mengunggah gambar/teks status)',
+            [{ text: 'OK', onClick: () => {} }]
+        );
     });
 
+    // Banned screen event listeners
+    bannedOkBtn.addEventListener('click', () => {
+        // Just close the banned message, stay on banned screen until unbanned
+        showNotificationModal(
+            'Akun Anda Diblokir',
+            'Akun Anda masih diblokir. Anda dapat mengirimkan permintaan tinjauan.',
+            [{ text: 'OK', onClick: () => {} }]
+        );
+    });
+    requestReviewBtn.addEventListener('click', () => {
+        reviewReasonInput.style.display = 'block';
+        sendReviewBtn.style.display = 'block';
+        requestReviewBtn.style.display = 'none'; // Hide this button after showing input
+    });
+    sendReviewBtn.addEventListener('click', sendBanReview);
 
     // Admin controls
     backFromAdminBtn.addEventListener('click', () => {
@@ -1346,71 +2535,97 @@
     });
     addUserBtn.addEventListener('click', addUser);
 
+
     // Bottom navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
-
             const targetScreenId = this.dataset.screen;
-            if (targetScreenId === 'main-chat-list-screen') {
-                showScreen('main-chat-list-screen');
-                renderChatList();
+
+            // Handle admin access check
+            if (targetScreenId === 'admin-control-screen') {
+                if (!currentUser || !currentUser.isAdmin) {
+                    showNotificationModal(
+                        'Akses Ditolak',
+                        'Anda tidak memiliki izin untuk mengakses panel admin.',
+                        [{ text: 'OK', onClick: () => {} }]
+                    );
+                    // Prevent changing active state if unauthorized
+                    return;
+                }
+                showScreen('admin-control-screen');
+                renderUserManagementList();
+                renderBannedReviewList();
+                updateAdminStats();
             } else if (targetScreenId === 'call-screen-nav') {
-                 // For now, if no active chat, just show call screen as "idle"
-                startCall(null); // Pass null to indicate not calling a specific chat yet
+                // If clicked from bottom nav, simulate a new call or show call history
+                startCall(null); // Pass null to indicate general call screen
             } else if (targetScreenId === 'status-screen') {
                 showScreen('status-screen');
                 renderStatusList();
-            } else if (targetScreenId === 'admin-control-screen') {
-                if (currentUser && currentUser.isAdmin) {
-                    showScreen('admin-control-screen');
-                    renderUserManagementList();
-                    updateAdminStats();
-                } else {
-                    alert('Anda tidak memiliki akses admin!');
-                    // Revert active state if not admin
-                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                    document.querySelector('.nav-item[data-screen="main-chat-list-screen"]').classList.add('active');
-                }
+            } else { // Default for chat list
+                showScreen('main-chat-list-screen');
+                renderChatList();
             }
+
+             // Update active class for nav items
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
         });
     });
 
 
-    // --- Initial Load Logic ---
+    // --- Initial Load Logic (Hacker Effect) ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Simulate initial loading
         loadingScreen.classList.add('show');
-        const consoleText = `
-Connecting to Annas Chat Server...
-Authenticating user session...
-Loading secure modules...
-Establishing encrypted connection...
-Initialization complete.
-Access Granted.
-`;
-        const consoleElement = document.querySelector('.hacker-console');
-        consoleElement.textContent = ''; // Clear existing text
+        const consoleTexts = [
+            'Initializing Annas Chat System...',
+            'Establishing secure connection to server [OK]',
+            'Authenticating core modules... [DONE]',
+            'Loading user profiles and chat history...',
+            'Decrypting sensitive data... [SUCCESS]',
+            'Scanning for vulnerabilities... [CLEAN]',
+            'Applying latest security patches...',
+            'Network stability check... [OPTIMAL]',
+            'Accessing global user database...',
+            'Verifying admin credentials...',
+            'Welcome, Operator. All systems operational.',
+            'Executing main application...',
+            'LOADING COMPLETE. ENJOY YOUR CHAT EXPERIENCE.',
+            '', // Empty line for final effect
+            'READY',
+            ''
+        ];
 
-        let i = 0;
-        const speed = 30; // typing speed
-        function typeWriter() {
-            if (i < consoleText.length) {
-                consoleElement.textContent += consoleText.charAt(i);
-                i++;
-                setTimeout(typeWriter, speed);
+        let textIndex = 0;
+        let charIndex = 0;
+        const typingSpeed = 30; // Faster typing
+        const lineDelay = 500; // Delay before next line
+
+        function typeLine() {
+            if (textIndex < consoleTexts.length) {
+                const currentLine = consoleTexts[textIndex];
+                if (charIndex < currentLine.length) {
+                    hackerConsole.textContent += currentLine.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeLine, typingSpeed);
+                } else {
+                    hackerConsole.textContent += '\n'; // New line after full line
+                    charIndex = 0;
+                    textIndex++;
+                    setTimeout(typeLine, lineDelay);
+                }
             } else {
+                // All lines typed, transition to auth screen
                 setTimeout(() => {
                     loadingScreen.style.opacity = '0';
                     loadingScreen.addEventListener('transitionend', () => {
                         loadingScreen.style.display = 'none';
                         showScreen('auth-screen'); // Show auth screen after loading
                     }, { once: true });
-                }, 1000); // Wait a bit after typing finishes
+                }, 1500); // Wait a bit after typing finishes
             }
         }
-        typeWriter();
+        typeLine(); // Start the typing animation
     });
   </script>
 </body>
