@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Annas Chat - WhatsApp Reimagined</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Noto+Sans:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     /* ---------------------------------- Global Styles ---------------------------------- */
     * {
@@ -37,13 +37,16 @@
       --gemini-color: #4CAF50;
       --instagram-blue: #0095f6; /* For verified badge */
       --wa-online-status: #4CAF50;
+
+      /* Hacker Effect Colors */
+      --hacker-green: #00FF00;
+      --hacker-dark: #0A0A0A;
+      --hacker-light-green: #0F0;
     }
 
     body {
       font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #075E54, #128C7E, #34B7F1, #25D366);
-      background-size: 400% 400%;
-      animation: gradientBG 25s ease infinite;
+      background: var(--whatsapp-dark-bg); /* Use dark background for body */
       color: var(--text-dark);
       height: 100vh;
       overflow: hidden;
@@ -52,12 +55,6 @@
       align-items: center;
       transition: background-color 0.5s ease;
       position: relative; /* For modal overlay */
-    }
-
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
 
     /* ---------------------------------- General Container Styling ---------------------------------- */
@@ -87,22 +84,48 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: var(--whatsapp-primary);
+        background: var(--hacker-dark); /* Dark background for hacker effect */
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         z-index: 2000;
-        color: var(--text-light);
+        color: var(--hacker-green);
         font-size: 1.5em;
         font-weight: 600;
         transition: opacity 0.5s ease;
         opacity: 0; /* Initially hidden */
         pointer-events: none;
+        overflow: hidden;
     }
     #loading-screen.show {
         opacity: 1;
         pointer-events: all;
+    }
+
+    .hacker-console {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.9em;
+        text-align: left;
+        width: 80%;
+        max-width: 600px;
+        margin-bottom: 30px;
+        color: var(--hacker-light-green);
+        text-shadow: 0 0 5px var(--hacker-green);
+        white-space: pre-wrap; /* Preserve line breaks and spaces */
+        overflow: hidden;
+        border-right: 0.15em solid var(--hacker-green); /* blinking cursor */
+        animation: typing 3.5s steps(40, end) forwards, blink-caret 0.75s step-end infinite;
+    }
+
+    @keyframes typing {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+
+    @keyframes blink-caret {
+        from, to { border-color: transparent; }
+        50% { border-color: var(--hacker-green); }
     }
 
     .person-walk {
@@ -132,11 +155,11 @@
         width: 100%;
         position: relative;
         z-index: 10;
-        background: transparent; /* Body handles the gradient */
+        background: var(--whatsapp-dark-bg);
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--whatsapp-dark-sidebar); /* Darker card for auth */
       border-radius: 20px;
       padding: 40px;
       box-shadow: 0 15px 40px var(--shadow-heavy);
@@ -148,7 +171,8 @@
       transform: scale(0.95) translateY(10px);
       opacity: 0;
       animation: fadeInZoomIn 0.8s forwards ease-out;
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-light);
     }
 
     @keyframes fadeInZoomIn {
@@ -161,7 +185,7 @@
     .card h2 {
       text-align: center;
       margin-bottom: 30px;
-      color: var(--whatsapp-primary);
+      color: var(--whatsapp-secondary);
       font-weight: 900;
       font-size: 2.2em;
       letter-spacing: 0.5px;
@@ -178,13 +202,19 @@
       margin: 15px 0;
       font-size: 1.05em;
       border-radius: 12px;
-      border: 1px solid var(--border-light);
-      background-color: var(--whatsapp-input-bg);
+      border: 1px solid rgba(255,255,255,0.15);
+      background-color: var(--whatsapp-dark-input);
+      color: var(--text-light);
       transition: all 0.3s ease;
       box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.06);
       font-family: 'Roboto', sans-serif;
       resize: vertical;
       min-height: 55px; /* For textarea */
+    }
+    input[type="text"]::placeholder,
+    input[type="password"]::placeholder,
+    textarea::placeholder {
+        color: #889094;
     }
 
     input[type="text"]:focus,
@@ -195,7 +225,7 @@
       border-color: var(--whatsapp-secondary);
       box-shadow: 0 0 0 4px rgba(18, 140, 126, 0.3);
       outline: none;
-      background-color: var(--text-light);
+      background-color: #32404A; /* Slightly lighter on focus */
     }
 
     button {
@@ -240,7 +270,7 @@
     }
 
     .link {
-      color: var(--whatsapp-primary);
+      color: var(--whatsapp-secondary);
       cursor: pointer;
       text-align: center;
       margin-top: 20px;
@@ -251,7 +281,7 @@
     }
 
     .link:hover {
-      color: var(--whatsapp-secondary);
+      color: var(--whatsapp-primary);
       text-decoration: underline;
     }
 
@@ -945,6 +975,7 @@
     #modal-actions button.confirm-btn:hover { background: var(--whatsapp-primary); }
     #modal-actions button.danger { background: var(--danger-color); }
     #modal-actions button.success { background: var(--success-color); }
+    #modal-actions button.info { background: var(--info-color); }
 
     .profile-pic-upload-container {
         display: flex;
@@ -998,10 +1029,11 @@
         max-width: 550px !important;
     }
     .controls-panel {
-        background: var(--whatsapp-dark-input);
+        background: #1F2C34; /* Darker background for panels */
         padding: 20px;
         border-radius: 12px;
         margin-top: 15px;
+        border: 1px solid rgba(255,255,255,0.08);
     }
     .controls-panel h4 {
         color: var(--whatsapp-secondary);
@@ -1017,6 +1049,7 @@
         border-radius: 10px;
         background: #444;
         color: var(--text-light);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
     .controls-panel button i { margin-right: 8px; }
     .controls-panel button.danger { background: var(--danger-color); }
@@ -1043,6 +1076,7 @@
         border-radius: 6px;
         width: auto;
         margin-right: 5px;
+        box-shadow: none;
     }
     .stats {
         font-size: 0.85em;
@@ -1185,6 +1219,99 @@
     #admin-user-controls-screen .controls-body button.success { background: var(--success-color); }
     #admin-user-controls-screen .controls-body button.info { background: var(--info-color); }
 
+    /* ---------------------------------- UGD Screen ---------------------------------- */
+    #ugd-screen {
+        display: none;
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+        max-width: 500px;
+        background: linear-gradient(135deg, #FF6B6B, #EE4D4D, #CC0000); /* Emergency Red Gradient */
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        border-radius: 10px;
+        margin: auto;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-light);
+        text-align: center;
+    }
+    #ugd-screen .ugd-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(0,0,0,0.3);
+        padding: 15px;
+        font-size: 1.8em;
+        font-weight: 700;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #ugd-screen .ugd-header .back-btn {
+        position: absolute;
+        left: 15px;
+        background: none;
+        border: none;
+        color: var(--text-light);
+        font-size: 1.5em;
+        cursor: pointer;
+    }
+
+    #ugd-screen .ugd-icon {
+        font-size: 8em;
+        margin-bottom: 30px;
+        color: var(--text-light);
+        text-shadow: 0 0 15px rgba(255,255,255,0.5);
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    #ugd-screen h2 {
+        font-size: 2.5em;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    #ugd-screen p {
+        font-size: 1.1em;
+        margin-bottom: 40px;
+        max-width: 80%;
+        line-height: 1.4;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+    #ugd-screen .ugd-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 80%;
+        max-width: 350px;
+    }
+    #ugd-screen .ugd-buttons button {
+        padding: 20px;
+        font-size: 1.4em;
+        border-radius: 15px;
+        background: rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.5);
+        color: var(--text-light);
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+    }
+    #ugd-screen .ugd-buttons button:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    #ugd-screen .ugd-buttons button i {
+        margin-right: 15px;
+        font-size: 1.2em;
+    }
 
     /* ---------------------------------- Responsive Design (Mobile First) ---------------------------------- */
     @media (max-width: 768px) {
@@ -1221,7 +1348,8 @@
       #main-chat-list-screen,
       #individual-chat-screen,
       #admin-user-controls-screen,
-      #call-screen {
+      #call-screen,
+      #ugd-screen {
         max-width: none;
         border-radius: 0;
         height: 100vh;
@@ -1295,56 +1423,25 @@
         padding: 6px 12px;
         font-size: 0.8em;
       }
-    }
 
-    /* Simulate Dark Mode by default for WhatsApp look */
-    body {
-        background: var(--whatsapp-dark-bg); /* Use dark background for body */
+      #ugd-screen h2 {
+        font-size: 1.8em;
+      }
+      #ugd-screen p {
+        font-size: 1em;
+      }
+      #ugd-screen .ugd-buttons button {
+        font-size: 1.1em;
+        padding: 15px;
+      }
     }
-    .card {
-        background: var(--whatsapp-dark-sidebar); /* Darker card for auth */
-        color: var(--text-light);
-        border: 1px solid rgba(255,255,255,0.1);
-    }
-    .card h2 {
-        color: var(--whatsapp-secondary);
-        background: none;
-        -webkit-background-clip: unset;
-        -webkit-text-fill-color: unset;
-    }
-    input[type="text"], input[type="password"], textarea {
-        background-color: var(--whatsapp-dark-input);
-        border: 1px solid rgba(255,255,255,0.15);
-        color: var(--text-light);
-    }
-    input[type="text"]::placeholder, input[type="password"]::placeholder, textarea::placeholder {
-        color: #889094;
-    }
-    input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
-        background-color: #32404A;
-        box-shadow: 0 0 0 4px rgba(18, 140, 126, 0.3);
-    }
-    .link {
-        color: var(--whatsapp-secondary);
-    }
-    .message {
-        color: var(--danger-color);
-    }
-    button {
-        background: linear-gradient(45deg, var(--whatsapp-secondary), var(--whatsapp-primary));
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    }
-    button:hover {
-        background: linear-gradient(45deg, var(--whatsapp-primary), var(--whatsapp-secondary));
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
-    }
-
   </style>
 </head>
 <body>
   <div id="loading-screen">
+    <pre class="hacker-console" id="hacker-console"></pre>
     <div class="person-walk"></div>
-    Memuat Annas Chat...
+    <span id="loading-text">Memuat Annas Chat...</span>
   </div>
 
   <div id="auth-screen" class="app-screen active">
@@ -1389,21 +1486,21 @@
     <div id="fab-chat" onclick="startChat('new-chat-partner-placeholder')"> <i class="fas fa-comment-alt"></i>
     </div>
     <div id="bottom-nav">
-      <div class="nav-item active" data-nav="chat">
+      <div class="nav-item active" data-nav="chat" onclick="showScreen('main-chat-list-screen'); document.querySelectorAll('#bottom-nav .nav-item').forEach(item => item.classList.remove('active')); this.classList.add('active');">
         <i class="fas fa-comment-dots"></i>
         <span>Chat</span>
       </div>
-      <div class="nav-item" data-nav="calls" onclick="alert('Fitur Panggilan sedang dikembangkan!');">
+      <div class="nav-item" data-nav="calls" onclick="alert('Fitur Panggilan sedang dikembangkan!'); document.querySelectorAll('#bottom-nav .nav-item').forEach(item => item.classList.remove('active')); this.classList.add('active');">
         <i class="fas fa-phone"></i>
         <span>Panggilan</span>
       </div>
-      <div class="nav-item" data-nav="updates" onclick="alert('Fitur Pembaruan sedang dikembangkan!');">
+      <div class="nav-item" data-nav="updates" onclick="alert('Fitur Pembaruan sedang dikembangkan!'); document.querySelectorAll('#bottom-nav .nav-item').forEach(item => item.classList.remove('active')); this.classList.add('active');">
         <i class="fas fa-circle-notch"></i>
         <span>Pembaruan</span>
       </div>
-      <div class="nav-item" data-nav="features" onclick="alert('Fitur Lainnya sedang dikembangkan!');">
-        <i class="fas fa-ellipsis-h"></i>
-        <span>Fitur</span>
+      <div class="nav-item" data-nav="ugd" onclick="showScreen('ugd-screen'); document.querySelectorAll('#bottom-nav .nav-item').forEach(item => item.classList.remove('active')); this.classList.add('active');">
+        <i class="fas fa-first-aid"></i>
+        <span>UGD</span>
       </div>
     </div>
   </div>
@@ -1458,7 +1555,7 @@
 
         <div class="controls-panel" id="admin-controls-panel" style="display:none;">
             <h4><i class="fas fa-user-shield"></i> Kontrol Admin</h4>
-            <button class="info" onclick="showAllUserStats()"><i class="fas fa-chart-line"></i> Statistik Pengguna</button>
+            <button class="info" onclick="showAllUserStats()"><i class="fas fa-chart-line"></i> Statistik Pengguna Lengkap</button>
             <button class="warning" onclick="showBanUserModal()"><i class="fas fa-user-slash"></i> Kelola Blokir Pengguna</button>
             <button class="success" onclick="showReviewRequests()"><i class="fas fa-clipboard-check"></i> Tinjau Permintaan Akun</button>
             <button class="danger" onclick="showDeleteUserModal()"><i class="fas fa-user-times"></i> Hapus Pengguna Permanen</button>
@@ -1472,7 +1569,7 @@
   <div id="call-screen" class="app-screen">
     <div class="call-avatar" id="call-partner-avatar-lg"></div>
     <h2 id="call-partner-name-lg" style="margin-top: 20px;"></h2>
-    <p class="call-status" id="call-status-text">Menghubungkan...</p>
+    <p class="call-status" id="call-status-text"></p>
 
     <div class="call-controls">
         <button class="mute-btn" title="Mute"><i class="fas fa-microphone-slash"></i></button>
@@ -1481,6 +1578,20 @@
     </div>
   </div>
 
+  <div id="ugd-screen" class="app-screen">
+    <div class="ugd-header">
+        <button class="back-btn" onclick="showScreen('main-chat-list-screen')"><i class="fas fa-arrow-left"></i></button>
+        <span>Unit Gawat Darurat (UGD)</span>
+    </div>
+    <i class="fas fa-medkit ugd-icon"></i>
+    <h2>Butuh Bantuan Mendesak?</h2>
+    <p>Di sini Anda bisa meminta bantuan darurat. Fitur ini hanya simulasi.</p>
+    <div class="ugd-buttons">
+        <button onclick="alert('Panggilan ke layanan darurat (simulasi)');"><i class="fas fa-phone-alt"></i> Panggil Layanan Darurat</button>
+        <button onclick="alert('Kirim lokasi Anda (simulasi)');"><i class="fas fa-map-marker-alt"></i> Bagikan Lokasi Darurat</button>
+        <button onclick="alert('Kirim pesan otomatis ke kontak darurat (simulasi)');"><i class="fas fa-sms"></i> Kirim Pesan Darurat</button>
+    </div>
+  </div>
 
   <div id="modal-backdrop">
     <div id="modal-content">
@@ -1499,7 +1610,7 @@
 
     // Initial user data. Annas is admin.
     let users = JSON.parse(localStorage.getItem('users')) || [
-      { username: 'annas', password: 'annas', displayName: 'Admin Annas', bio: 'Saya adalah Administrator.', role: 'admin', banned: false, profilePic: null, stats: { logins: 0, chatsSent: 0, chatsReceived: 0 } }
+      { username: 'annas', password: 'annas', displayName: 'Admin Annas', bio: 'Saya adalah Administrator Annas Chat.', role: 'admin', banned: false, profilePic: null, stats: { logins: 0, chatsSent: 0, chatsReceived: 0 } }
     ];
     let currentUser = null;
     let activeReceiver = null;
@@ -1518,6 +1629,10 @@
                 screen.classList.add('transition-out');
             }
         });
+        // Deactivate all nav items then activate the current one
+        document.querySelectorAll('#bottom-nav .nav-item').forEach(item => item.classList.remove('active'));
+        const activeNavItem = document.querySelector(`#bottom-nav .nav-item[data-nav="${screenId.replace('-screen', '')}"]`);
+        if(activeNavItem) activeNavItem.classList.add('active');
     }
 
     // Function to get current timestamp formatted
@@ -1529,8 +1644,55 @@
     }
 
     // --- Loading Screen ---
+    const hackerConsoleElement = document.getElementById('hacker-console');
+    const loadingTextElement = document.getElementById('loading-text');
+
     function showLoadingScreen() {
         document.getElementById('loading-screen').classList.add('show');
+        hackerConsoleElement.innerText = ''; // Clear previous text
+        loadingTextElement.style.display = 'none'; // Hide text initially
+
+        const hackerScript = [
+            'Initializing Annas Chat OS v1.0.0...',
+            'Establishing secure connection to server...',
+            '  [OK] Server link established.',
+            'Verifying user credentials...',
+            '  [OK] Authentication module loaded.',
+            '  [OK] User data fetched from encrypted storage.',
+            'Loading core chat components...',
+            '  [OK] UI/UX framework ready.',
+            '  [OK] Message parsing engine initialized.',
+            '  [OK] Media handler configured.',
+            'Applying security patches...',
+            '  [OK] End-to-end encryption active.',
+            'Establishing peer-to-peer protocols...',
+            '  [OK] All modules loaded. Ready for chat.'
+        ];
+
+        let lineIndex = 0;
+        let charIndex = 0;
+        let typingInterval;
+
+        function typeLine() {
+            if (lineIndex < hackerScript.length) {
+                if (charIndex <= hackerScript[lineIndex].length) {
+                    hackerConsoleElement.innerText = hackerScript[lineIndex].substring(0, charIndex);
+                    charIndex++;
+                    typingInterval = setTimeout(typeLine, 30); // Faster typing
+                } else {
+                    hackerConsoleElement.innerText += '\n'; // New line after full line
+                    lineIndex++;
+                    charIndex = 0;
+                    typingInterval = setTimeout(typeLine, 100); // Pause before next line
+                }
+            } else {
+                clearInterval(typingInterval);
+                hackerConsoleElement.style.animation = 'none';
+                hackerConsoleElement.style.borderRight = 'none';
+                loadingTextElement.style.display = 'block'; // Show "Memuat Annas Chat..."
+            }
+        }
+        typeLine();
     }
 
     function hideLoadingScreen() {
@@ -1604,7 +1766,7 @@
         
         document.getElementById('login-username').value = '';
         document.getElementById('login-password').value = '';
-      }, 2000); 
+      }, 4000); // Increased timeout for hacker effect
     }
 
     function logout() {
@@ -1632,13 +1794,13 @@
         geminiLi.className = 'chat-list-item';
         geminiLi.onclick = () => startChat('gemini');
         geminiLi.innerHTML = `
-            <div class="avatar"><i class="fas fa-robot"></i></div>
+            <div class="avatar" style="background-color: #007bff;"><i class="fas fa-robot"></i></div>
             <div class="chat-info">
-                <span class="chat-name">Gemini AI</span>
+                <span class="chat-name">Gemini AI <i class="fas fa-badge-check admin-badge" title="Official Bot" style="color: #007bff;"></i></span>
                 <span class="last-message">Asisten AI Anda.</span>
             </div>
             <div class="chat-meta">
-                <span class="timestamp">Online</span>
+                <span class="timestamp" style="color: var(--wa-online-status);">Online</span>
             </div>
         `;
         chatListUl.appendChild(geminiLi);
@@ -1659,6 +1821,7 @@
             if (chatHistory.length > 0) {
                 const lastMsg = chatHistory[chatHistory.length - 1];
                 lastMessage = lastMsg.type === 'text' ? lastMsg.content : `[${lastMsg.type.toUpperCase()}] File`;
+                lastMessage = lastMsg.content.length > 30 ? lastMsg.content.substring(0, 27) + '...' : lastMsg.content;
             }
 
             li.innerHTML = `
@@ -1686,7 +1849,7 @@
 
         const targetUser = users.find(u => u.username === username);
         if (username === 'gemini') {
-            document.getElementById('chat-partner-name').innerText = 'Gemini AI';
+            document.getElementById('chat-partner-name').innerHTML = 'Gemini AI <i class="fas fa-badge-check admin-badge" title="Official Bot" style="color: #007bff;"></i>';
             document.getElementById('chat-partner-avatar').innerHTML = '<i class="fas fa-robot"></i>';
             document.getElementById('chat-partner-status').innerText = 'Online';
         } else if (targetUser) {
@@ -2001,6 +2164,18 @@
                 users[userIndex].banned = true;
                 localStorage.setItem('users', JSON.stringify(users));
                 alert(`Pengguna ${users[userIndex].displayName} berhasil diblokir.`);
+                
+                // Send notification message to banned user from admin
+                if (!messages[`annas-${usernameToBan}`]) messages[`annas-${usernameToBan}`] = [];
+                messages[`annas-${usernameToBan}`].push({
+                    sender: 'annas', // Admin's actual username
+                    receiver: usernameToBan,
+                    type: 'text',
+                    content: 'Pesan Admin: Akun Anda telah diblokir secara permanen karena pelanggaran kebijakan. Anda dapat mengajukan banding melalui layar login.',
+                    timestamp: getTimestamp()
+                });
+                saveMessages();
+
                 refreshChatList(); // Update chat list to remove banned user
                 showAdminStats();
                 closeModal(); 
@@ -2021,6 +2196,18 @@
                 users[userIndex].banned = false;
                 localStorage.setItem('users', JSON.stringify(users));
                 alert(`Pengguna ${users[userIndex].displayName} berhasil dibuka blokirnya.`);
+
+                // Send notification message to unbanned user from admin
+                if (!messages[`annas-${usernameToUnban}`]) messages[`annas-${usernameToUnban}`] = [];
+                messages[`annas-${usernameToUnban}`].push({
+                    sender: 'annas', // Admin's actual username
+                    receiver: usernameToUnban,
+                    type: 'text',
+                    content: 'Pesan Admin: Akun Anda telah berhasil dibuka oleh administrator. Terima kasih atas kesabaran Anda.',
+                    timestamp: getTimestamp()
+                });
+                saveMessages();
+
                 refreshChatList(); // Update chat list to show user
                 showAdminStats();
                 closeModal(); 
@@ -2108,19 +2295,22 @@
 
         if (action === 'accept') {
             targetUser.banned = false;
-            responseMessage = `Akun Anda berhasil dibuka oleh administrator.`;
+            responseMessage = `Pemberitahuan Sistem: Administrator telah meninjau banding Anda dan akun Anda berhasil dibuka. Anda kini dapat login dan menggunakan Annas Chat kembali.`;
             alert(`Akun ${targetUser.username} berhasil dibuka. Pesan notifikasi akan dikirim.`);
         } else { 
-            responseMessage = `Akun Anda ditolak untuk dibuka oleh administrator.`;
+            responseMessage = `Pemberitahuan Sistem: Administrator telah meninjau banding Anda dan akun Anda ditolak untuk dibuka. Akun Anda tetap diblokir.`;
             alert(`Akun ${targetUser.username} ditolak untuk dibuka. Pesan notifikasi akan dikirim.`);
         }
 
-        if (!messages[`admin-${targetUser.username}`]) messages[`admin-${targetUser.username}`] = [];
-        messages[`admin-${targetUser.username}`].push({
+        // Send message from 'annas' (admin) to the user's chat history
+        // Create a unique chat key for admin-user communication
+        const adminChatKey = `annas-${targetUser.username}`; 
+        if (!messages[adminChatKey]) messages[adminChatKey] = [];
+        messages[adminChatKey].push({
             sender: 'annas', // Admin's actual username
             receiver: targetUser.username,
             type: 'text',
-            content: `Pesan Admin: ${responseMessage}`,
+            content: responseMessage,
             timestamp: getTimestamp()
         });
         saveMessages();
@@ -2174,9 +2364,6 @@
                 localStorage.setItem('users', JSON.stringify(users));
                 alert('Profil berhasil diperbarui!');
                 refreshChatList(); // Update main list
-                if (activeReceiver === currentUser.username) { // If currently chatting with self (not possible in this setup) or in profile view
-                    // Re-render chat header or profile view if needed
-                }
                 closeModal();
             }
             reader.readAsDataURL(newProfilePicFile);
@@ -2242,7 +2429,7 @@
             }
 
             if (reviewRequests.some(req => req.username === currentUser.username)) {
-                alert('Anda sudah memiliki permintaan tinjauan yang tertunda.');
+                alert('Anda sudah memiliki permintaan tinjauan yang tertunda. Mohon tunggu balasan administrator.');
                 closeModal();
                 return;
             }
@@ -2295,16 +2482,29 @@
     // Initialize on load
     document.addEventListener('DOMContentLoaded', () => {
         showLoadingScreen();
+        // Load currentUser from localStorage if exists
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            currentUser = users.find(u => u.username === storedUser);
+        }
+
         setTimeout(() => {
             hideLoadingScreen();
-            if (currentUser) {
+            if (currentUser && !currentUser.banned) { // Check if user exists and is not banned
                 showScreen('main-chat-list-screen');
                 refreshChatList();
-            } else {
+            } else if (currentUser && currentUser.banned) { // If banned, show review modal
+                showScreen('auth-screen'); // Stay on auth screen
+                toggleAuthScreen('login'); // Ensure login form is visible
+                document.getElementById('login-username').value = currentUser.username;
+                document.getElementById('login-password').focus(); // Prompt for password
+                showRequestReviewModal();
+            }
+             else {
                 showScreen('auth-screen');
                 toggleAuthScreen('login'); // Default to login screen
             }
-        }, 2000); 
+        }, 4000); // Increased timeout for hacker effect animation
     });
   </script>
 </body>
