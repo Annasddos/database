@@ -7,1525 +7,482 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    /* ---------------------------------- Global Styles ---------------------------------- */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    /* Your existing CSS (as provided in your previous message) goes here */
+    /* Make sure to include the new chat bubble CSS I provided previously */
 
-    /* New Color Palette: Modern & Sleek */
-    :root {
-      --primary-dark: #1A1A2E; /* Deep Dark Blue */
-      --secondary-dark: #16213E; /* Slightly Lighter Dark Blue */
-      --accent-purple: #6F42C1; /* Vibrant Purple Accent */
-      --accent-blue: #0F3460; /* Darker Blue for Elements */
-      --text-light: #E0E0E0; /* Light Gray Text */
-      --text-muted: #A0A0A0; /* Muted Gray Text */
-      --bubble-sent: #0F3460; /* Dark Blue for Sent Bubbles */
-      --bubble-received: #2D2E4A; /* Slightly Purple Dark for Received Bubbles */
-      --border-color: rgba(255, 255, 255, 0.1);
-      --shadow-light: rgba(0, 0, 0, 0.2);
-      --shadow-heavy: rgba(0, 0, 0, 0.4);
-      --success-color: #28a745;
-      --danger-color: #dc3545;
-      --warning-color: #ffc107;
-      --info-color: #007bff;
-
-      /* Hacker Effect Colors */
-      --hacker-green: #00FF00;
-      --hacker-dark: #0A0A0A;
-      --hacker-light-green: #0F0;
-      
-      /* Instagram-like Verified Badge */
-      --verified-blue: #3897f0;
-    }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, var(--primary-dark), #0F0E17); /* Gradient background */
-      color: var(--text-light);
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: background-color 0.5s ease;
-      position: relative;
-    }
-
-    /* ---------------------------------- General Container Styling ---------------------------------- */
-    .app-screen {
-        width: 100%;
-        height: 100%;
-        display: none; /* Controlled by JS */
-        position: absolute;
-        top: 0;
-        left: 0;
-        transition: transform 0.4s ease-out, opacity 0.4s ease-out; /* Smoother transitions */
-        border-radius: 20px; /* Rounded corners for the entire app */
-        overflow: hidden; /* Ensure content stays within rounded corners */
-        box-shadow: 0 10px 40px var(--shadow-heavy);
-        max-width: 500px; /* Simulate phone width */
-        margin: auto;
-    }
-    .app-screen.active {
-        display: flex;
-        transform: translateY(0);
-        opacity: 1;
-    }
-    .app-screen.transition-out {
-        transform: translateY(-30px) scale(0.95);
-        opacity: 0;
-    }
-
-    /* ---------------------------------- Loading Screen ---------------------------------- */
-    #loading-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: var(--hacker-dark);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000;
-        color: var(--hacker-green);
-        font-size: 1.5em;
-        font-weight: 600;
-        transition: opacity 0.5s ease;
-        opacity: 0;
-        pointer-events: none;
-        overflow: hidden;
-    }
-    #loading-screen.show {
-        opacity: 1;
-        pointer-events: all;
-    }
-
-    .hacker-console {
-        font-family: 'Press Start 2P', cursive;
-        font-size: 0.8em; /* Slightly smaller */
-        text-align: left;
-        width: 85%; /* Wider console */
-        max-width: 650px;
-        margin-bottom: 30px;
-        color: var(--hacker-light-green);
-        text-shadow: 0 0 8px var(--hacker-green); /* Stronger shadow */
-        white-space: pre-wrap;
-        overflow: hidden;
-        border-right: 0.15em solid var(--hacker-green);
-        animation: typing 4s steps(40, end) forwards, blink-caret 0.75s step-end infinite;
-        padding: 10px;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for console */
-        border-radius: 8px;
-    }
-
-    @keyframes typing {
-        from { width: 0; }
-        to { width: 100%; }
-    }
-
-    @keyframes blink-caret {
-        from, to { border-color: transparent; }
-        50% { border-color: var(--hacker-green); }
-    }
-
-    .person-walk {
-        width: 150px; /* Larger person */
-        height: 150px;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300FF00"><path d="M12 2C10.9 2 10 2.9 10 4s.9 2 2 2 2-.9 2-2-.9-2-2-2zM21 16v-2h-3v-3c0-.55-.45-1-1-1s-1 .45-1 1v3h-2v-3c0-.55-.45-1-1-1s-1 .45-1 1v3h-2v-3c0-.55-.45-1-1-1s-1 .45-1 1v3H3v2h2.5L7 21h2l-2.5-5h2.5L12 21h2l-2.5-5h2.5L17 21h2l-2.5-5H21z"/></svg>'); /* Green walking person SVG */
-        background-size: contain;
-        background-repeat: no-repeat;
-        animation: walk 2s infinite steps(2); /* Slower walk */
-        margin-bottom: 25px;
-        filter: drop-shadow(0 0 15px var(--hacker-light-green)); /* Green glow */
-    }
-
-    @keyframes walk {
-        0% { transform: translateX(-50px) rotateY(0deg); } /* Wider movement */
-        50% { transform: translateX(50px) rotateY(0deg); }
-        51% { transform: translateX(50px) rotateY(180deg); }
-        100% { transform: translateX(-50px) rotateY(180deg); }
-    }
-    
-    /* ---------------------------------- Auth Screen (Login/Register) ---------------------------------- */
-    #auth-screen {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        width: 100%;
-        position: relative;
-        z-index: 10;
-        background: var(--primary-dark);
-    }
-
-    .card {
-      background: var(--secondary-dark);
-      border-radius: 25px; /* More rounded */
-      padding: 40px;
-      box-shadow: 0 20px 50px var(--shadow-heavy); /* Deeper shadow */
-      max-width: 500px; /* Slightly wider */
-      width: 90%;
-      margin: auto;
-      backdrop-filter: blur(15px); /* Stronger blur */
-      transition: all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      transform: scale(0.9) translateY(20px); /* More dramatic initial state */
-      opacity: 0;
-      animation: fadeInZoomIn 0.9s forwards ease-out; /* Slower animation */
-      border: 1px solid var(--border-color);
-      color: var(--text-light);
-    }
-
-    @keyframes fadeInZoomIn {
-      to {
-        transform: scale(1) translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .card h2 {
-      text-align: center;
-      margin-bottom: 35px; /* More space */
-      color: var(--accent-purple); /* Purple accent */
-      font-weight: 900;
-      font-size: 2.5em; /* Larger title */
-      letter-spacing: 1px; /* More spacing */
-      text-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    input[type="text"],
-    input[type="password"],
-    input[type="email"],
-    input[type="number"],
-    textarea {
-      width: 100%;
-      padding: 18px 22px; /* Larger padding */
-      margin: 18px 0; /* More margin */
-      font-size: 1.1em; /* Larger font */
-      border-radius: 15px; /* More rounded input */
-      border: 1px solid var(--border-color);
-      background-color: var(--accent-blue);
-      color: var(--text-light);
-      transition: all 0.4s ease; /* Smoother transition */
-      box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.1); /* Deeper inset shadow */
-      font-family: 'Poppins', sans-serif;
-      resize: vertical;
-      min-height: 60px; /* For textarea */
-    }
-    input[type="text"]::placeholder,
-    input[type="password"]::placeholder,
-    textarea::placeholder {
-        color: var(--text-muted);
-        opacity: 0.8;
-    }
-
-    input[type="text"]:focus,
-    input[type="password"]:focus,
-    input[type="email"]:focus,
-    input[type="number"]:focus,
-    textarea:focus {
-      border-color: var(--accent-purple);
-      box-shadow: 0 0 0 5px rgba(111, 66, 193, 0.3); /* Purple glow */
-      outline: none;
-      background-color: #263859; /* Slightly lighter on focus */
-    }
-
-    button {
-      width: 100%;
-      padding: 20px; /* Larger padding */
-      margin-top: 30px; /* More margin */
-      font-size: 1.3em; /* Larger font */
-      border-radius: 15px; /* More rounded */
-      border: none;
-      background: linear-gradient(45deg, var(--accent-purple), #9D6EFD); /* Purple gradient */
-      color: var(--text-light);
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-      position: relative;
-      overflow: hidden;
-      z-index: 1;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); /* Deeper shadow */
-    }
-
-    button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 200%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent); /* Stronger shimmer */
-      z-index: -1;
-      transition: transform 0.6s ease;
-      transform: skewX(-25deg); /* More pronounced skew */
-    }
-
-    button:hover::before {
-      transform: skewX(-25deg) translateX(125%);
-    }
-
-    button:hover {
-      transform: translateY(-5px) scale(1.02); /* More lift */
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-      background: linear-gradient(45deg, #9D6EFD, var(--accent-purple)); /* Inverted gradient on hover */
-    }
-
-    .link {
-      color: var(--accent-purple);
-      cursor: pointer;
-      text-align: center;
-      margin-top: 25px; /* More margin */
-      display: block;
-      font-size: 1.05em; /* Slightly larger */
-      transition: color 0.3s ease, text-decoration 0.3s ease;
-      font-weight: 500;
-    }
-
-    .link:hover {
-      color: #9D6EFD; /* Lighter purple on hover */
-      text-decoration: underline;
-    }
-
-    .message {
-      color: var(--danger-color);
-      text-align: center;
-      margin-top: 20px; /* More margin */
-      font-weight: 600;
-      font-size: 1.05em;
-    }
-
-    /* ---------------------------------- Main Chat List Screen ---------------------------------- */
-    #main-chat-list-screen {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        background: var(--primary-dark);
-    }
-    
-    #main-chat-list-header {
-        background: var(--secondary-dark);
-        color: var(--text-light);
-        padding: 20px 25px; /* More padding */
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 1.6em; /* Larger title */
-        font-weight: 800;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Deeper shadow */
-        border-bottom: 1px solid var(--border-color);
-    }
-    #main-chat-list-header .app-title {
-        color: var(--accent-purple);
-        font-size: 1.1em;
-        font-weight: 900;
-        letter-spacing: 0.5px;
-    }
-    #main-chat-list-header .header-icons i {
-        margin-left: 25px; /* More spacing */
-        cursor: pointer;
-        color: var(--text-muted);
-        transition: color 0.3s ease, transform 0.2s ease;
-    }
-    #main-chat-list-header .header-icons i:hover {
-        color: var(--text-light);
-        transform: scale(1.1);
-    }
-
-    #promo-banner {
-        background: #2D2E4A; /* Consistent with new palette */
-        color: var(--text-muted);
-        padding: 15px 25px;
-        font-size: 0.95em;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--border-color);
-    }
-    #promo-banner a {
-        color: var(--accent-purple);
-        text-decoration: none;
-        font-weight: 600;
-        margin-left: 8px;
-        transition: color 0.2s ease;
-    }
-    #promo-banner a:hover {
-        color: #9D6EFD;
-        text-decoration: underline;
-    }
-    #promo-banner .close-btn {
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        font-size: 1.3em;
-        cursor: pointer;
-        padding: 0;
-        width: auto;
-        margin-top: 0;
-        box-shadow: none;
-        transition: color 0.2s ease;
-    }
-    #promo-banner .close-btn:hover {
-        color: var(--text-light);
-        transform: none; /* Override general button hover */
-    }
-
-
-    #chat-list-content {
+    /* Add this for basic message bubbles if not already present */
+    #chat-messages {
         flex: 1;
         overflow-y: auto;
-        background: var(--primary-dark);
-        padding-top: 10px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Space between bubbles */
+        background: url('https://i.ibb.co/L9p6qL0/chat-bg.jpg') no-repeat center center / cover; /* Example background, replace with your own or remove */
+        position: relative;
+        min-height: 0;
     }
 
-    .chat-list-item {
-      display: flex;
-      align-items: center;
-      padding: 15px 25px; /* More padding */
-      border-bottom: 1px solid rgba(255,255,255,0.05); /* Lighter separator */
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      color: var(--text-light);
-      position: relative;
-    }
-    .chat-list-item:hover {
-      background-color: rgba(255,255,255,0.08); /* More noticeable hover */
+    .message-bubble {
+        max-width: 80%;
+        padding: 12px 18px;
+        border-radius: 20px;
+        position: relative;
+        font-size: 0.95em;
+        word-wrap: break-word;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255,255,255,0.05);
     }
 
-    .chat-list-item .avatar {
-      width: 55px; /* Larger avatar */
-      height: 55px;
-      border-radius: 50%;
-      background-color: var(--accent-blue);
-      margin-right: 18px; /* More spacing */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: var(--text-light);
-      font-weight: 600;
-      font-size: 1.3em; /* Larger initials */
-      flex-shrink: 0;
-      overflow: hidden;
-      border: 3px solid rgba(255,255,255,0.2); /* Thicker border */
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .chat-list-item .avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .chat-list-item .chat-info {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .chat-list-item .chat-name {
-      font-weight: 700;
-      font-size: 1.1em; /* Slightly larger name */
-      display: flex;
-      align-items: center;
-      margin-bottom: 3px; /* Space between name and message */
-    }
-    .chat-list-item .chat-name .admin-badge {
-        color: var(--verified-blue); /* Instagram-like blue check */
-        font-size: 0.8em;
-        margin-left: 6px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    .chat-list-item .last-message {
-      font-size: 0.95em; /* Slightly larger message */
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: calc(100% - 80px); /* Adjust based on timestamp width */
-    }
-    .chat-list-item .chat-meta {
-      font-size: 0.85em; /* Slightly larger timestamp */
-      color: var(--text-muted);
-      margin-left: auto;
-      text-align: right;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-    }
-    .chat-list-item .timestamp {
-        color: var(--text-muted);
-    }
-    .chat-list-item .unread-count {
-        background: var(--accent-purple); /* Purple unread dot */
+    .message-bubble.sent {
+        align-self: flex-end;
+        background-color: var(--bubble-sent);
         color: var(--text-light);
-        font-size: 0.75em;
-        font-weight: 700;
-        border-radius: 50%;
-        width: 22px;
-        height: 22px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 5px;
-        box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+        border-bottom-right-radius: 5px;
     }
 
-    /* ---------------------------------- Bottom Navigation ---------------------------------- */
-    #bottom-nav {
+    .message-bubble.received {
+        align-self: flex-start;
+        background-color: var(--bubble-received);
+        color: var(--text-light);
+        border-bottom-left-radius: 5px;
+    }
+
+    .message-bubble.info {
+        align-self: center;
+        background-color: rgba(111, 66, 193, 0.15);
+        color: var(--accent-purple);
+        font-size: 0.85em;
+        text-align: center;
+        max-width: 90%;
+        margin: 5px auto;
+        border-radius: 15px;
+        padding: 8px 15px;
+        font-style: italic;
+        box-shadow: none;
+        border: 1px solid rgba(111, 66, 193, 0.3);
+    }
+
+    .message-bubble .message-sender {
+        display: block;
+        font-size: 0.75em;
+        font-weight: 600;
+        margin-bottom: 5px;
+        opacity: 0.8;
+        color: var(--text-light);
+    }
+    .message-bubble.received .message-sender {
+        color: #9D6EFD;
+    }
+
+    .message-bubble .message-timestamp {
+        display: block;
+        font-size: 0.7em;
+        color: var(--text-muted);
+        margin-top: 5px;
+        text-align: right;
+        opacity: 0.7;
+    }
+
+    /* Chat input area */
+    #chat-input-area {
         display: flex;
+        align-items: center;
+        padding: 10px 15px;
         background: var(--secondary-dark);
         border-top: 1px solid var(--border-color);
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.3); /* Deeper shadow */
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
         flex-shrink: 0;
-        padding: 5px 0; /* Add vertical padding */
+        gap: 10px;
     }
-    .nav-item {
-        flex: 1;
-        text-align: center;
-        padding: 15px 0; /* More padding */
-        color: var(--text-muted);
-        font-size: 0.9em; /* Larger text */
-        cursor: pointer;
-        transition: color 0.3s ease, background-color 0.3s ease, transform 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .nav-item i {
-        font-size: 1.7em; /* Larger icon */
-        margin-bottom: 8px; /* More spacing */
-    }
-    .nav-item.active {
-        color: var(--accent-purple);
-        font-weight: 700;
-        transform: translateY(-3px); /* Slight lift */
-    }
-    .nav-item:hover {
-        background-color: rgba(255,255,255,0.05);
-        color: var(--text-light);
-    }
-    .nav-item.active i {
-        transform: scale(1.15); /* More pronounced scale */
-        transition: transform 0.2s ease;
-    }
-    /* Floating action button */
-    #fab-chat {
-        position: absolute;
-        bottom: 85px; /* Above nav bar */
-        right: 30px; /* More to the right */
-        background: linear-gradient(45deg, var(--accent-purple), #9D6EFD); /* Purple gradient */
-        color: var(--text-light);
-        width: 65px; /* Larger FAB */
-        height: 65px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 2em; /* Larger icon */
-        box-shadow: 0 8px 20px rgba(0,0,0,0.4); /* Deeper shadow */
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        z-index: 100;
-    }
-    #fab-chat:hover {
-        background: linear-gradient(45deg, #9D6EFD, var(--accent-purple));
-        transform: translateY(-8px) rotate(8deg) scale(1.08); /* More dramatic hover */
-    }
-
-
-    /* ---------------------------------- Individual Chat Screen ---------------------------------- */
-    #individual-chat-screen {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        background: var(--primary-dark);
-    }
-
-    #chat-header {
-      background: var(--secondary-dark);
-      color: var(--text-light);
-      padding: 15px 20px; /* More padding */
-      display: flex;
-      align-items: center;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      flex-shrink: 0;
-      position: relative;
-      z-index: 50;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    #chat-header .back-btn {
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        font-size: 1.6em; /* Larger icon */
-        margin-right: 20px;
-        cursor: pointer;
-        padding: 5px;
-        transition: color 0.2s ease, transform 0.2s ease;
-    }
-    #chat-header .back-btn:hover {
-        color: var(--text-light);
-        transform: translateX(-3px);
-    }
-
-    #chat-header .chat-partner-avatar {
-        width: 48px; /* Larger avatar */
-        height: 48px;
-        border-radius: 50%;
-        background-color: var(--accent-blue);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: var(--text-light);
-        font-weight: 600;
-        font-size: 1.2em;
-        flex-shrink: 0;
-        overflow: hidden;
-        border: 2px solid rgba(255,255,255,0.2);
-    }
-    #chat-header .chat-partner-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    #chat-header .chat-partner-info {
-        display: flex;
-        flex-direction: column;
+    #chat-input-area textarea {
         flex-grow: 1;
-        margin-left: 15px; /* More spacing */
-    }
-
-    #chat-header .chat-partner-name {
-        font-size: 1.2em; /* Larger font */
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    #chat-header .chat-partner-name .admin-badge {
-        color: var(--verified-blue);
-        font-size: 0.85em; /* Slightly larger badge */
-        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-    }
-    #chat-header .chat-partner-status {
-        font-size: 0.8em; /* Slightly larger */
-        font-weight: 400;
-        opacity: 0.9;
-        color: var(--text-muted);
-    }
-    #chat-header .chat-options {
-      display: flex;
-      gap: 8px; /* More spacing */
-      margin-left: auto;
-    }
-
-    #chat-header .chat-options button {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.4em; /* Larger icons */
-      padding: 10px;
-      border-radius: 50%;
-      transition: background-color 0.2s ease, color 0.2s ease;
-      box-shadow: none;
-      margin: 0;
-      width: 45px; /* Larger hit area */
-      height: 45px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-    }
-
-    #chat-header .chat-options button:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-light);
-    }
-
-    /* End-to-end encryption notice */
-    .e2e-notice {
-        background-color: var(--secondary-dark);
-        color: var(--text-muted);
-        font-size: 0.88em; /* Slightly larger */
-        padding: 12px 20px;
-        text-align: center;
-        margin: 15px auto 5px auto; /* Adjust margin */
-        border-radius: 10px; /* More rounded */
-        max-width: 90%;
-        position: sticky;
-        top: 15px; /* Stay at top of scrollable area */
-        z-index: 10;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        border: 1px solid var(--border-color);
-    }
-    .e2e-notice i {
-        margin-right: 8px;
-        color: var(--accent-purple);
-    }
-    .e2e-notice a {
-        color: #9D6EFD; /* Lighter purple for link */
-        text-decoration: none;
-        font-weight: 500;
-        transition: text-decoration 0.2s ease;
-    }
-    .e2e-notice a:hover {
-        text-decoration: underline;
-    }
-
-    #chat-messages {
-      flex: 1;
-      padding: 15px 20px; /* More padding */
-      overflow-y: auto;
-      background: var(--primary-dark);
-      display: flex;
-      flex-direction: column;
-      gap: 10px; /* More space between bubbles */
-      scroll-behavior: smooth;
-      background-image: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="%23222B32" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="none" stroke="%232D2E4A" stroke-width="1.5"/><circle cx="12" cy="12" r="5" fill="%232D2E4A"/></svg>'); /* Abstract background pattern */
-      background-size: 150px; /* Larger pattern */
-      background-repeat: repeat;
-      position: relative; /* For scroll fades */
-    }
-    #chat-messages::before,
-    #chat-messages::after {
-        content: '';
-        position: sticky;
-        left: 0;
-        right: 0;
-        height: 20px; /* Larger fade */
-        z-index: 5;
-        pointer-events: none;
-    }
-    #chat-messages::before {
-        top: 0;
-        background: linear-gradient(to bottom, var(--primary-dark), rgba(26,26,46,0));
-    }
-    #chat-messages::after {
-        bottom: 0;
-        background: linear-gradient(to top, var(--primary-dark), rgba(26,26,46,0));
-    }
-
-
-    /* ---------------------------------- Message Bubbles ---------------------------------- */
-    .msg-bubble {
-      margin: 0;
-      padding: 10px 15px; /* More padding */
-      max-width: 75%; /* Slightly smaller max width */
-      border-radius: 18px; /* Smooth, rounded corners */
-      word-wrap: break-word;
-      font-size: 0.95em;
-      line-height: 1.4;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Deeper shadow */
-      position: relative;
-      animation: fadeInMessage 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      transform-origin: bottom;
-      color: var(--text-light);
-    }
-
-    @keyframes fadeInMessage {
-      from { opacity: 0; transform: translateY(10px) scale(0.95); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .msg-user {
-      background: var(--bubble-sent);
-      align-self: flex-end;
-      text-align: left; /* Keep text aligned left for user bubbles */
-      border-bottom-right-radius: 6px; /* Slightly less rounded on the 'tail' side */
-    }
-
-    .msg-bot {
-      background: var(--bubble-received);
-      align-self: flex-start;
-      border-bottom-left-radius: 6px; /* Slightly less rounded on the 'tail' side */
-    }
-
-    /* Message tails (optional, can be removed for cleaner look) */
-    /* For a truly non-WA look, you might remove these entirely or make them very subtle */
-    /*
-    .msg-user::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      right: -8px;
-      width: 15px;
-      height: 25px;
-      background: var(--bubble-sent);
-      border-bottom-left-radius: 100%;
-      border-top-right-radius: 0;
-      border-top-left-radius: 100%;
-      transform: rotate(25deg) skewX(25deg);
-      z-index: -1;
-      box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
-    }
-
-    .msg-bot::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: -8px;
-      width: 15px;
-      height: 25px;
-      background: var(--bubble-received);
-      border-bottom-right-radius: 100%;
-      border-top-left-radius: 0;
-      border-top-right-radius: 100%;
-      transform: rotate(-25deg) skewX(-25deg);
-      z-index: -1;
-      box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
-    }
-    */
-
-    .msg-bubble img,
-    .msg-bubble audio,
-    .msg-bubble video {
-      max-width: 100%;
-      border-radius: 10px; /* More rounded media */
-      display: block;
-      margin-top: 5px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .msg-timestamp {
-      font-size: 0.7em; /* Smaller timestamp */
-      color: var(--text-muted);
-      margin-top: 5px;
-      display: block;
-      opacity: 0.9;
-      float: right;
-      margin-left: 10px;
-    }
-    .msg-user .msg-timestamp {
-      color: #B0B0B0; /* Slightly lighter for contrast */
-    }
-    .msg-bot .msg-timestamp {
-        color: #A0A0A0;
-    }
-
-
-    /* ---------------------------------- Chat Input Bar ---------------------------------- */
-    #chat-input-bar {
-      display: flex;
-      padding: 10px 15px; /* More padding */
-      background: var(--secondary-dark);
-      align-items: center;
-      gap: 10px; /* More spacing */
-      flex-shrink: 0;
-      border-top: 1px solid var(--border-color);
-    }
-
-    #chat-input-bar .input-icons {
-        display: flex;
-        gap: 8px; /* More spacing */
-    }
-
-    #chat-input-bar .input-icons button {
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        font-size: 1.5em; /* Larger icons */
-        width: 40px; /* Larger hit area */
-        height: 40px;
-        border-radius: 50%;
-        transition: color 0.2s ease, background-color 0.2s ease;
-        padding: 0;
+        min-height: 25px;
+        max-height: 120px;
+        height: auto;
+        padding: 12px 15px;
         margin: 0;
-        box-shadow: none;
-    }
-    #chat-input-bar .input-icons button:hover {
-        color: var(--text-light);
-        background-color: rgba(255,255,255,0.1);
-        transform: none;
-    }
-
-    #chat-input-bar .message-input-wrapper {
-        flex: 1;
-        position: relative;
-    }
-    #chat-input-bar input[type="text"] {
-        width: 100%;
-        padding: 12px 45px 12px 18px; /* Adjust for smiley icon & padding */
-        border-radius: 25px; /* More rounded */
-        border: none;
+        border-radius: 25px;
         background-color: var(--accent-blue);
+        border: 1px solid var(--border-color);
         color: var(--text-light);
         font-size: 1em;
-        transition: all 0.3s ease;
-        box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
-        min-height: 48px; /* Ensure input height is adequate */
-        margin: 0;
+        resize: none;
+        overflow-y: auto;
     }
-    #chat-input-bar input[type="text"]::placeholder {
+    #chat-input-area textarea:focus {
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 0 4px rgba(111, 66, 193, 0.2);
+    }
+    #chat-input-area .icon-btn {
+        background: none;
+        border: none;
         color: var(--text-muted);
-    }
-    #chat-input-bar input[type="text"]:focus {
-        background-color: #263859;
-        box-shadow: 0 0 0 3px var(--accent-purple);
-    }
-    #chat-input-bar .smiley-icon {
-        position: absolute;
-        right: 18px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-muted);
+        font-size: 1.6em;
         cursor: pointer;
-        font-size: 1.3em;
-        transition: color 0.2s ease;
+        padding: 8px;
+        border-radius: 50%;
+        transition: color 0.2s ease, background-color 0.2s ease;
+        width: auto;
+        margin: 0;
+        box-shadow: none;
+        flex-shrink: 0;
     }
-    #chat-input-bar .smiley-icon:hover {
+    #chat-input-area .icon-btn:hover {
+        color: var(--accent-purple);
+        background-color: rgba(111, 66, 193, 0.1);
+        transform: none;
+    }
+    #chat-input-area #send-message-btn {
+        background: linear-gradient(45deg, var(--accent-purple), #9D6EFD);
+        color: var(--text-light);
+        width: 50px;
+        height: 50px;
+        font-size: 1.3em;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transition: background 0.3s ease, transform 0.2s ease;
+        flex-shrink: 0;
+    }
+    #chat-input-area #send-message-btn:hover {
+        background: linear-gradient(45deg, #9D6EFD, var(--accent-purple));
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    /* Styles for Call Screen */
+    #call-screen {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0A0A0A, #16213E);
         color: var(--text-light);
     }
-
-    #chat-input-bar input[type="file"] {
-      display: none;
+    #call-screen .call-info {
+        text-align: center;
+        margin-bottom: 50px;
     }
-
-    #chat-input-bar .mic-send-button {
-      background: linear-gradient(45deg, var(--accent-purple), #9D6EFD); /* Purple gradient */
-      color: var(--text-light);
-      width: 50px; /* Larger button */
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.5em; /* Larger icon */
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      margin: 0;
-      padding: 0;
-    }
-    #chat-input-bar .mic-send-button:hover {
-      background: linear-gradient(45deg, #9D6EFD, var(--accent-purple));
-      transform: scale(1.08);
-    }
-
-    /* ---------------------------------- Modal Styles (Used for all popups) ---------------------------------- */
-    #modal-backdrop {
-      display: flex;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.85); /* Darker overlay */
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-
-    #modal-backdrop.show {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    #modal-content {
-      background: var(--secondary-dark);
-      border-radius: 20px; /* More rounded */
-      padding: 35px;
-      box-shadow: 0 20px 50px var(--shadow-heavy);
-      max-width: 450px;
-      width: 90%;
-      transform: scale(0.85) translateY(20px); /* More dramatic initial state */
-      opacity: 0;
-      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      border: 1px solid var(--border-color);
-      color: var(--text-light);
-    }
-
-    #modal-backdrop.show #modal-content {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-    }
-
-    #modal-title {
-      margin-bottom: 25px; /* More space */
-      text-align: center;
-      color: var(--accent-purple);
-      font-weight: 800;
-      font-size: 1.8em; /* Larger title */
-    }
-
-    #modal-body p {
-      margin-bottom: 15px;
-      line-height: 1.6;
-      color: var(--text-muted);
-    }
-
-    #modal-body input, #modal-body textarea, #modal-body select {
-      margin-bottom: 12px;
-      background-color: var(--accent-blue);
-      border: 1px solid var(--border-color);
-      color: var(--text-light);
-      padding: 12px 15px;
-      border-radius: 10px;
-    }
-    #modal-body input::placeholder, #modal-body textarea::placeholder {
-        color: var(--text-muted);
-    }
-
-
-    #modal-actions {
-      margin-top: 30px; /* More space */
-      display: flex;
-      justify-content: flex-end;
-      gap: 15px; /* More spacing */
-    }
-
-    #modal-actions button {
-      width: auto;
-      padding: 12px 25px; /* More padding */
-      font-size: 1em; /* Slightly larger */
-      margin: 0;
-      border-radius: 12px; /* More rounded */
-      box-shadow: none;
-      background: var(--accent-blue); /* Default dark background for modal buttons */
-      color: var(--text-light);
-      font-weight: 500;
-    }
-
-    #modal-actions button.cancel-btn { background: #5a6268; } /* Darker grey */
-    #modal-actions button.confirm-btn { background: var(--accent-purple); }
-    #modal-actions button.confirm-btn:hover { background: #9D6EFD; }
-    #modal-actions button.danger { background: var(--danger-color); }
-    #modal-actions button.success { background: var(--success-color); }
-    #modal-actions button.info { background: var(--info-color); }
-
-    .profile-pic-upload-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 25px; /* More space */
-    }
-    .profile-pic-preview {
-        width: 110px; /* Larger preview */
-        height: 110px;
+    #call-screen .call-info .call-avatar {
+        width: 150px;
+        height: 150px;
         border-radius: 50%;
         background-color: var(--accent-blue);
+        margin: 0 auto 20px;
         display: flex;
         justify-content: center;
         align-items: center;
+        font-size: 3em;
+        font-weight: 700;
         overflow: hidden;
-        margin-bottom: 12px;
-        border: 4px solid var(--accent-purple); /* Thicker accent border */
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        border: 5px solid rgba(255,255,255,0.3);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .profile-pic-preview img {
+    #call-screen .call-info .call-avatar img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
-    .profile-pic-preview .initials {
-        font-size: 3.2em; /* Larger initials */
-        font-weight: bold;
-        color: var(--text-light);
-    }
-    .upload-btn {
-        background: var(--info-color);
-        color: white;
-        padding: 10px 18px; /* More padding */
-        border-radius: 10px; /* More rounded */
-        cursor: pointer;
-        font-size: 0.9em; /* Slightly larger */
-        margin: 0;
-        width: auto;
-        display: inline-flex;
-        align-items: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        font-weight: 500;
-    }
-    .upload-btn:hover {
-        background: #0069d9;
-        transform: translateY(-2px);
-    }
-
-    .admin-controls-modal {
-        max-width: 600px !important; /* Wider for admin controls */
-    }
-    .controls-panel {
-        background: var(--accent-blue);
-        padding: 25px; /* More padding */
-        border-radius: 15px; /* More rounded */
-        margin-top: 20px; /* More space */
-        border: 1px solid var(--border-color);
-        box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
-    }
-    .controls-panel h4 {
-        color: var(--accent-purple);
-        margin-bottom: 20px; /* More space */
-        font-size: 1.3em; /* Larger title */
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding-bottom: 10px;
-    }
-    .controls-panel button {
+    #call-screen .call-info h2 {
+        font-size: 2.5em;
         margin-bottom: 10px;
-        padding: 14px; /* More padding */
-        font-size: 1em; /* Slightly larger */
-        border-radius: 12px;
-        background: #394361; /* Slightly different dark blue */
-        color: var(--text-light);
-        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    }
-    .controls-panel button i { margin-right: 10px; }
-    .controls-panel button.danger { background: var(--danger-color); }
-    .controls-panel button.success { background: var(--success-color); }
-    .controls-panel button.info { background: var(--info-color); }
-    .controls-panel button.default { background: #6c757d; }
-
-    .review-request-item {
-        background: #2D2E4A; /* Slightly purple dark */
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 15px; /* More padding */
-        margin-bottom: 10px;
-        font-size: 0.95em;
-        color: var(--text-light);
-        box-shadow: 0 1px 5px rgba(0,0,0,0.1);
-    }
-    .review-request-item strong {
         color: var(--accent-purple);
     }
-    .review-request-item .actions button {
-        margin-top: 10px;
-        padding: 8px 15px;
-        font-size: 0.85em;
-        border-radius: 8px;
-        width: auto;
-        margin-right: 8px;
-        box-shadow: none;
-    }
-    .stats {
-        font-size: 0.9em;
-        background: #2D2E4A;
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        color: var(--text-light);
-        line-height: 1.8;
-        box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .modal-scrollable-content {
-        max-height: 350px; /* Taller scrollable content */
-        overflow-y: auto;
-        padding-right: 8px; /* For scrollbar space */
-    }
-
-    /* ---------------------------------- Call Screen (Simulated) ---------------------------------- */
-    #call-screen {
-        display: none;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(135deg, var(--primary-dark), var(--accent-blue)); /* Dark gradient for call screen */
-        color: var(--text-light);
-        font-size: 1.6em;
-        font-weight: 500;
-        text-align: center;
-        position: relative;
-    }
-    #call-screen .call-avatar {
-        width: 180px; /* Larger avatar */
-        height: 180px;
-        border-radius: 50%;
-        background-color: var(--secondary-dark);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        margin-bottom: 25px;
-        border: 6px solid rgba(255,255,255,0.3);
-        box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    }
-    #call-screen .call-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    #call-screen .call-avatar .initials {
-        font-size: 4.5em;
-    }
-    #call-screen .call-status {
-        font-size: 0.85em;
-        opacity: 0.9;
-        margin-top: 8px;
+    #call-screen .call-info p {
+        font-size: 1.2em;
         color: var(--text-muted);
     }
     #call-screen .call-controls {
         display: flex;
-        gap: 40px; /* More spacing */
-        margin-top: 50px; /* More space */
+        gap: 30px;
     }
     #call-screen .call-controls button {
-        width: 80px; /* Larger buttons */
-        height: 80px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
-        font-size: 2em; /* Larger icons */
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        margin: 0;
-        padding: 0;
+        border: none;
+        background-color: rgba(255,255,255,0.1);
+        color: var(--text-light);
+        font-size: 2em;
+        cursor: pointer;
         display: flex;
         justify-content: center;
         align-items: center;
-        border: none;
-        color: var(--text-light);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    #call-screen .call-controls .end-call-btn {
-        background: var(--danger-color);
-    }
-    #call-screen .call-controls .mute-btn,
-    #call-screen .call-controls .speaker-btn {
-        background: var(--accent-blue);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transition: background-color 0.3s ease, transform 0.2s ease;
     }
     #call-screen .call-controls button:hover {
-        transform: scale(1.15);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+        background-color: rgba(255,255,255,0.2);
+        transform: scale(1.05);
     }
-    #call-screen .call-header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(0,0,0,0.3);
-        padding: 15px;
-        font-size: 1.2em;
-        font-weight: 600;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    #call-screen .call-controls .end-call {
+        background-color: var(--danger-color);
     }
-    #call-screen .call-header .back-btn {
-        position: absolute;
-        left: 15px;
-        background: none;
-        border: none;
-        color: var(--text-light);
-        font-size: 1.5em;
-        cursor: pointer;
+    #call-screen .call-controls .end-call:hover {
+        background-color: #e65252;
     }
 
-
-    /* ---------------------------------- Admin & User Controls Screen ---------------------------------- */
-    #admin-user-controls-screen {
-        display: none;
+    /* Styles for Status Screen */
+    #status-screen {
         flex-direction: column;
-        height: 100%;
         background: var(--primary-dark);
+        padding: 20px;
     }
-    #admin-user-controls-screen .controls-header {
-        background: var(--secondary-dark);
-        color: var(--text-light);
-        padding: 20px 25px;
+    #status-screen .status-header {
         display: flex;
         align-items: center;
-        font-size: 1.6em;
-        font-weight: 800;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        flex-shrink: 0;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
         border-bottom: 1px solid var(--border-color);
     }
-    #admin-user-controls-screen .controls-header .back-btn {
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        font-size: 1.6em;
+    #status-screen .status-header .my-status-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: var(--accent-blue);
         margin-right: 20px;
-        cursor: pointer;
-        padding: 5px;
-        transition: color 0.2s ease, transform 0.2s ease;
-    }
-    #admin-user-controls-screen .controls-header .back-btn:hover {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         color: var(--text-light);
-        transform: translateX(-3px);
-    }
-    #admin-user-controls-screen .controls-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 25px;
-        color: var(--text-light);
-    }
-    #admin-user-controls-screen .controls-body button {
-        background: var(--accent-blue);
-        color: var(--text-light);
-        margin-bottom: 15px;
-        padding: 18px; /* More padding */
-        font-size: 1.1em; /* Larger font */
-        border-radius: 15px; /* More rounded */
-        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        font-weight: 500;
-        transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    #admin-user-controls-screen .controls-body button i {
-        margin-right: 12px;
-        font-size: 1.2em;
-    }
-    #admin-user-controls-screen .controls-body button:hover {
-        transform: translateY(-3px);
-        background: #263859;
+        font-size: 1.8em;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid var(--accent-purple); /* Highlight for own status */
         box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
-    #admin-user-controls-screen .controls-body button.danger { background: var(--danger-color); }
-    #admin-user-controls-screen .controls-body button.success { background: var(--success-color); }
-    #admin-user-controls-screen .controls-body button.info { background: var(--info-color); }
-
-    /* ---------------------------------- UGD Screen ---------------------------------- */
-    #ugd-screen {
-        display: none;
-        flex-direction: column;
-        height: 100%;
-        background: linear-gradient(135deg, #FF6B6B, #E63946, #CC0000); /* Emergency Red Gradient */
-        box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        margin: auto;
-        justify-content: center;
-        align-items: center;
-        color: var(--text-light);
-        text-align: center;
-        position: relative;
-    }
-    #ugd-screen .ugd-header {
-        position: absolute;
-        top: 0;
-        left: 0;
+    #status-screen .status-header .my-status-avatar img {
         width: 100%;
-        background: rgba(0,0,0,0.4); /* Darker overlay */
-        padding: 20px;
-        font-size: 1.8em;
-        font-weight: 800;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
+        height: 100%;
+        object-fit: cover;
     }
-    #ugd-screen .ugd-header .back-btn {
+    #status-screen .status-header .my-status-avatar .add-status-icon {
         position: absolute;
-        left: 20px;
-        background: none;
-        border: none;
-        color: var(--text-light);
-        font-size: 1.6em;
+        bottom: 0;
+        right: 0;
+        background-color: var(--success-color);
+        color: white;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.8em;
+        border: 2px solid var(--primary-dark);
         cursor: pointer;
         transition: transform 0.2s ease;
     }
-    #ugd-screen .ugd-header .back-btn:hover {
-        transform: translateX(-5px);
+    #status-screen .status-header .my-status-avatar .add-status-icon:hover {
+        transform: scale(1.1);
     }
-
-    #ugd-screen .ugd-icon {
-        font-size: 9em; /* Larger icon */
-        margin-bottom: 40px; /* More spacing */
+    #status-screen .status-header .status-text h3 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
         color: var(--text-light);
-        text-shadow: 0 0 20px rgba(255,255,255,0.7); /* Stronger glow */
-        animation: pulse 1.8s infinite ease-in-out; /* Slower pulse */
     }
-
-    @keyframes pulse {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.15); opacity: 0.9; } /* More pronounced pulse */
-        100% { transform: scale(1); opacity: 1; }
-    }
-
-    #ugd-screen h2 {
-        font-size: 2.8em; /* Larger title */
-        margin-bottom: 20px;
-        text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-    }
-    #ugd-screen p {
-        font-size: 1.2em; /* Larger text */
-        margin-bottom: 50px; /* More spacing */
-        max-width: 85%;
-        line-height: 1.5;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-    }
-    #ugd-screen .ugd-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 25px; /* More spacing */
-        width: 85%;
-        max-width: 400px; /* Wider buttons */
-    }
-    #ugd-screen .ugd-buttons button {
-        padding: 22px; /* More padding */
-        font-size: 1.5em; /* Larger font */
-        border-radius: 18px; /* More rounded */
-        background: rgba(255,255,255,0.25); /* Slightly less transparent */
-        border: 2px solid rgba(255,255,255,0.6); /* Thicker, more visible border */
-        color: var(--text-light);
-        font-weight: bold;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.4); /* Deeper shadow */
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        backdrop-filter: blur(5px);
-    }
-    #ugd-screen .ugd-buttons button:hover {
-        background: rgba(255,255,255,0.4);
-        transform: translateY(-8px) scale(1.05); /* More dramatic hover */
-        box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-    }
-    #ugd-screen .ugd-buttons button i {
-        margin-right: 18px;
-        font-size: 1.3em;
-    }
-
-    /* ---------------------------------- Responsive Design (Mobile First) ---------------------------------- */
-    @media (max-width: 768px) {
-      body {
-        align-items: flex-start;
-        padding: 0;
-      }
-      .app-screen {
-        border-radius: 0;
-        box-shadow: none;
-        max-width: none;
-      }
-      .card {
-        border-radius: 0;
-        height: 100%;
-        width: 100%;
-        max-width: none;
-        padding: 30px;
-        box-shadow: none;
-        animation: none;
-        transform: none;
-      }
-      .card h2 {
-        font-size: 2em;
-        margin-bottom: 25px;
-      }
-      input[type="text"], input[type="password"], textarea {
-        padding: 15px 20px;
-        margin: 12px 0;
-        font-size: 1em;
-        border-radius: 12px;
-      }
-      button {
-        padding: 16px;
-        font-size: 1.2em;
-        border-radius: 12px;
-        margin-top: 20px;
-      }
-
-      #main-chat-list-header, #chat-header, #admin-user-controls-screen .controls-header, #call-screen .call-header, #ugd-screen .ugd-header {
-        padding: 15px 20px;
-        font-size: 1.4em;
-      }
-      #main-chat-list-header .header-icons i, #chat-header .chat-options button, #chat-header .back-btn {
-        font-size: 1.4em;
-      }
-      .chat-list-item {
-        padding: 12px 20px;
-      }
-      .chat-list-item .avatar {
-        width: 50px;
-        height: 50px;
-      }
-      #chat-messages {
-        padding: 10px 15px;
-      }
-      .msg-bubble {
-        padding: 8px 12px;
+    #status-screen .status-header .status-text p {
         font-size: 0.9em;
-        border-radius: 15px;
-      }
-      #chat-input-bar {
-        padding: 8px 12px;
-      }
-      #chat-input-bar input[type="text"] {
-        padding: 10px 40px 10px 15px;
-        font-size: 0.95em;
-        min-height: 45px;
-      }
-      #chat-input-bar .input-icons button {
-        width: 38px;
-        height: 38px;
-        font-size: 1.3em;
-      }
-      #chat-input-bar .mic-send-button {
-        width: 48px;
-        height: 48px;
-        font-size: 1.4em;
-      }
-      #fab-chat {
-        bottom: 75px;
-        right: 25px;
-        width: 60px;
-        height: 60px;
-        font-size: 1.8em;
-      }
+        color: var(--text-muted);
+    }
 
-      #modal-content {
-        max-width: 95%;
-        padding: 30px;
-        border-radius: 15px;
-      }
-      #modal-title {
-        font-size: 1.6em;
-        margin-bottom: 20px;
-      }
-      #modal-actions button {
-        padding: 10px 20px;
-        font-size: 0.9em;
-      }
-      .profile-pic-preview {
-        width: 100px;
-        height: 100px;
-      }
-      .profile-pic-preview .initials {
-        font-size: 3em;
-      }
-      .upload-btn {
-        padding: 8px 15px;
-        font-size: 0.85em;
-      }
-
-      #ugd-screen h2 {
-        font-size: 2.2em;
-      }
-      #ugd-screen p {
+    #status-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+    .status-section-title {
         font-size: 1.1em;
-      }
-      #ugd-screen .ugd-buttons button {
-        font-size: 1.3em;
-        padding: 18px;
-      }
+        color: var(--text-muted);
+        margin: 20px 0 10px;
+        padding-left: 5px;
+        font-weight: 600;
     }
+    .status-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 5px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        border-radius: 10px;
+    }
+    .status-item:hover {
+        background-color: rgba(255,255,255,0.08);
+    }
+    .status-item .status-avatar {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background-color: var(--accent-blue);
+        margin-right: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-light);
+        font-weight: 600;
+        font-size: 1.2em;
+        overflow: hidden;
+        position: relative;
+        border: 2px solid var(--text-muted); /* Default border for viewed status */
+    }
+    .status-item .status-avatar.unseen {
+        border-color: var(--accent-purple); /* Highlight for unseen status */
+        border-width: 3px;
+    }
+    .status-item .status-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .status-item .status-info {
+        flex-grow: 1;
+    }
+    .status-item .status-info .status-name {
+        font-weight: 700;
+        font-size: 1.1em;
+        color: var(--text-light);
+    }
+    .status-item .status-info .status-time {
+        font-size: 0.85em;
+        color: var(--text-muted);
+    }
+
+    /* Admin Control Screen */
+    #admin-control-screen {
+        flex-direction: column;
+        background: var(--primary-dark);
+        padding: 20px;
+    }
+    #admin-control-screen h2 {
+        font-size: 1.8em;
+        color: var(--accent-purple);
+        margin-bottom: 25px;
+        text-align: center;
+    }
+    .admin-section {
+        background: var(--secondary-dark);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        border: 1px solid var(--border-color);
+    }
+    .admin-section h3 {
+        font-size: 1.3em;
+        color: var(--text-light);
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding-bottom: 10px;
+    }
+    .admin-list {
+        max-height: 250px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+    }
+    .admin-list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px dotted rgba(255,255,255,0.05);
+    }
+    .admin-list-item:last-child {
+        border-bottom: none;
+    }
+    .admin-list-item .user-info {
+        display: flex;
+        align-items: center;
+    }
+    .admin-list-item .user-info .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--accent-blue);
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-light);
+        font-size: 1em;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    .admin-list-item .user-info .username {
+        font-weight: 600;
+        color: var(--text-light);
+    }
+    .admin-list-item .admin-actions button {
+        background: none;
+        border: 1px solid var(--danger-color);
+        color: var(--danger-color);
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 0.9em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: 10px;
+        box-shadow: none; /* Override default button style */
+    }
+    .admin-list-item .admin-actions button.promote {
+        border-color: var(--success-color);
+        color: var(--success-color);
+    }
+    .admin-list-item .admin-actions button:hover {
+        background-color: var(--danger-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .admin-list-item .admin-actions button.promote:hover {
+        background-color: var(--success-color);
+        color: white;
+    }
+    .admin-form label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-muted);
+        font-size: 0.9em;
+    }
+    .admin-form input, .admin-form select {
+        width: calc(100% - 22px); /* Adjust for padding */
+        padding: 10px 10px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background-color: var(--accent-blue);
+        color: var(--text-light);
+        font-size: 1em;
+    }
+    .admin-form button {
+        margin-top: 10px;
+        background: var(--accent-purple);
+        padding: 12px 20px;
+        font-size: 1em;
+        border-radius: 10px;
+    }
+    .admin-form button:hover {
+        transform: translateY(-3px);
+    }
+
   </style>
 </head>
 <body>
-  <div id="loading-screen">
-    <pre class="hacker-console" id="hacker-console"></pre>
+
+  <div id="loading-screen" class="app-screen show">
+    <div class="hacker-console"></div>
     <div class="person-walk"></div>
-    <span id="loading-text">Memuat Annas Chat...</span>
   </div>
 
-  <div id="auth-screen" class="app-screen active">
-    <div class="login-form card" id="login-card">
-      <h2>Selamat Datang di Annas Chat</h2>
-      <input id="login-username" type="text" placeholder="Username Anda">
-      <input id="login-password" type="password" placeholder="Password Anda">
-      <button onclick="login()">Login</button>
-      <p class="link" onclick="toggleAuthScreen('register')">Belum punya akun? Daftar sekarang</p>
-      <p id="login-msg" class="message"></p>
-    </div>
-    <div class="register-form card" id="register-card" style="display:none">
-      <h2>Buat Akun Baru</h2>
-      <input id="reg-display-name" type="text" placeholder="Nama Panggilan/Tampilan Anda">
-      <input id="reg-username" type="text" placeholder="Username (tanpa @, misal: annas_user)">
-      <input id="reg-password" type="password" placeholder="Password Kuat (min 6 karakter)">
-      <textarea id="reg-bio" placeholder="Tulis bio singkat Anda (Opsional)"></textarea>
-      <button onclick="register()">Daftar</button>
-      <p class="link" onclick="toggleAuthScreen('login')">Sudah punya akun? Login</p>
-      <p id="reg-msg" class="message"></p>
+  <div id="auth-screen" class="app-screen">
+    <div class="card">
+      <h2 id="auth-title">Login</h2>
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password" />
+      <button id="auth-submit-btn">Login</button>
+      <p class="link" id="toggle-auth">Belum punya akun? Daftar di sini</p>
+      <p class="message" id="auth-message" style="display: none;"></p>
     </div>
   </div>
 
@@ -1533,1182 +490,928 @@
     <div id="main-chat-list-header">
       <span class="app-title">Annas Chat</span>
       <div class="header-icons">
-        <i class="fas fa-search" title="Cari Chat (Simulasi)"></i>
-        <i class="fas fa-cog" title="Pengaturan & Admin" onclick="showUserAdminControls()"></i>
+        <i class="fas fa-search"></i>
+        <i class="fas fa-ellipsis-v"></i>
       </div>
     </div>
     <div id="promo-banner">
-        <span>Tingkatkan pengalaman chat Anda dengan fitur premium! <a href="#">Pelajari</a></span>
-        <button class="close-btn" onclick="document.getElementById('promo-banner').style.display='none';"><i class="fas fa-times"></i></button>
+      <span>Mulai percakapan baru dengan Annas!</span>
+      <button class="close-btn">&times;</button>
     </div>
     <div id="chat-list-content">
-      <div id="chat-list-ul">
-        </div>
+      </div>
+    <div id="fab-chat"><i class="fas fa-comment-dots"></i></div>
     </div>
-    <div id="fab-chat" onclick="showNewChatContacts()">
-        <i class="fas fa-plus"></i> </div>
-    <div id="bottom-nav">
-      <div class="nav-item active" data-nav="main-chat-list" onclick="showScreen('main-chat-list-screen'); this.classList.add('active');">
-        <i class="fas fa-comment-alt"></i>
-        <span>Chat</span>
-      </div>
-      <div class="nav-item" data-nav="calls" onclick="showCallContacts(); this.classList.add('active');">
-        <i class="fas fa-phone-alt"></i>
-        <span>Panggilan</span>
-      </div>
-      <div class="nav-item" data-nav="status" onclick="alert('Fitur Status sedang dikembangkan!'); this.classList.add('active');">
-        <i class="fas fa-circle-notch"></i>
-        <span>Status</span>
-      </div>
-      <div class="nav-item" data-nav="ugd" onclick="showScreen('ugd-screen'); this.classList.add('active');">
-        <i class="fas fa-ambulance"></i> <span>Darurat</span>
-      </div>
-    </div>
-  </div>
 
   <div id="individual-chat-screen" class="app-screen">
     <div id="chat-header">
-      <button class="back-btn" onclick="showScreen('main-chat-list-screen')"><i class="fas fa-arrow-left"></i></button>
-      <div class="chat-partner-avatar" id="chat-partner-avatar"></div>
+      <button class="back-btn" id="back-to-chats"><i class="fas fa-arrow-left"></i></button>
+      <div class="chat-partner-avatar" id="chat-partner-avatar-display"></div>
       <div class="chat-partner-info">
-        <span class="chat-partner-name" id="chat-partner-name"></span>
-        <span class="chat-partner-status" id="chat-partner-status"></span>
+        <div class="chat-partner-name" id="chat-partner-name-display"></div>
+        <div class="chat-partner-status" id="chat-partner-status-display">Online</div>
       </div>
       <div class="chat-options">
-        <button title="Panggilan Video (Simulasi)" onclick="showCallScreen('video')"><i class="fas fa-video"></i></button>
-        <button title="Panggilan Suara (Simulasi)" onclick="showCallScreen('audio')"><i class="fas fa-phone"></i></button>
-        <button title="Lihat Profil" onclick="showContactProfile(activeReceiver)"><i class="fas fa-info-circle"></i></button>
+        <button class="icon-btn" id="call-btn"><i class="fas fa-video"></i></button>
+        <button class="icon-btn"><i class="fas fa-phone-alt"></i></button>
+        <button class="icon-btn"><i class="fas fa-ellipsis-v"></i></button>
       </div>
     </div>
+
     <div id="chat-messages">
-        <div class="e2e-notice">
-            <i class="fas fa-shield-alt"></i> Chat ini terenkripsi end-to-end. Ketuk untuk detail.
-        </div>
-        <div class="e2e-notice" style="margin-top: 10px;">
-            <i class="fas fa-hourglass-half"></i> Pesan baru akan hilang dalam 24 jam. Ketuk untuk mengubah.
-        </div>
-    </div>
-    <div id="chat-input-bar">
-      <div class="input-icons">
-          <button title="Lampirkan File" onclick="document.getElementById('file-input').click()"><i class="fas fa-paperclip"></i></button>
-          <button title="Gallery (Simulasi)"><i class="fas fa-image"></i></button>
       </div>
-      <div class="message-input-wrapper">
-        <input id="msg-input" type="text" placeholder="Ketik pesan..." onkeypress="handleKeyPress(event)">
-        <i class="fas fa-smile smiley-icon" title="Emoji"></i>
-      </div>
-      <input type="file" id="file-input" accept="image/*,audio/*,video/*" style="display:none;">
-      <button class="mic-send-button" title="Kirim Pesan" onclick="sendMessage()"><i class="fas fa-microphone"></i></button>
+
+    <div id="chat-input-area">
+      <button class="icon-btn"><i class="fas fa-grin"></i></button>
+      <textarea id="chat-input" placeholder="Pesan"></textarea>
+      <button class="icon-btn"><i class="fas fa-paperclip"></i></button>
+      <button class="icon-btn"><i class="fas fa-camera"></i></button>
+      <button id="send-message-btn"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
-
-  <div id="admin-user-controls-screen" class="app-screen">
-    <div class="controls-header">
-        <button class="back-btn" onclick="showScreen('main-chat-list-screen')"><i class="fas fa-arrow-left"></i></button>
-        <span>Pengaturan & Kontrol</span>
-    </div>
-    <div class="controls-body">
-        <div class="controls-panel" id="user-controls-panel">
-            <h4><i class="fas fa-user-cog"></i> Akun Anda</h4>
-            <button class="default" onclick="showEditProfileModal()"><i class="fas fa-user-edit"></i> Edit Profil & Bio</button>
-            <button class="info" onclick="changePassword()"><i class="fas fa-key"></i> Ganti Password</button>
-            <button class="danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
-        </div>
-
-        <div class="controls-panel" id="admin-controls-panel" style="display:none;">
-            <h4><i class="fas fa-shield-alt"></i> Kontrol Administrator</h4>
-            <button class="info" onclick="showAllUserStats()"><i class="fas fa-chart-bar"></i> Statistik Pengguna</button>
-            <button class="warning" onclick="showBanUserModal()"><i class="fas fa-user-slash"></i> Kelola Pemblokiran</button>
-            <button class="success" onclick="showReviewRequests()"><i class="fas fa-clipboard-list"></i> Tinjau Permintaan Banding</button>
-            <button class="danger" onclick="showDeleteUserModal()"><i class="fas fa-user-times"></i> Hapus Akun Permanen</button>
-            <div id="admin-stats" class="stats"></div>
-        </div>
-        <p style="text-align: center; margin-top: 25px; font-size: 0.85em; color: var(--text-muted);">Annas Chat Keren v2.0.0</p>
-    </div>
-  </div>
-
 
   <div id="call-screen" class="app-screen">
-    <div class="call-header">
-        <button class="back-btn" onclick="showScreen('individual-chat-screen')"><i class="fas fa-arrow-left"></i></button>
-        <span>Panggilan</span>
+    <div class="call-info">
+        <div class="call-avatar" id="calling-avatar"></div>
+        <h2 id="calling-name">Memanggil...</h2>
+        <p id="call-status">Menghubungkan...</p>
     </div>
-    <div class="call-avatar" id="call-partner-avatar-lg"></div>
-    <h2 id="call-partner-name-lg" style="margin-top: 25px;"></h2>
-    <p class="call-status" id="call-status-text"></p>
-
     <div class="call-controls">
-        <button class="mute-btn" title="Mute"><i class="fas fa-microphone-slash"></i></button>
-        <button class="end-call-btn" title="Akhiri Panggilan" onclick="endCall()"><i class="fas fa-phone-slash"></i></button>
-        <button class="speaker-btn" title="Speaker"><i class="fas fa-volume-up"></i></button>
+        <button><i class="fas fa-microphone-slash"></i></button>
+        <button><i class="fas fa-volume-up"></i></button>
+        <button class="end-call" id="end-call-btn"><i class="fas fa-phone-slash"></i></button>
     </div>
   </div>
 
-  <div id="ugd-screen" class="app-screen">
-    <div class="ugd-header">
-        <button class="back-btn" onclick="showScreen('main-chat-list-screen')"><i class="fas fa-arrow-left"></i></button>
-        <span>Layanan Darurat</span>
+  <div id="status-screen" class="app-screen">
+    <div class="status-header">
+        <div class="my-status-avatar">
+            <span>AZ</span> <div class="add-status-icon"><i class="fas fa-plus"></i></div>
+        </div>
+        <div class="status-text">
+            <h3>Status Saya</h3>
+            <p>Ketuk untuk memperbarui status</p>
+        </div>
     </div>
-    <i class="fas fa-ambulance ugd-icon"></i>
-    <h2>Butuh Bantuan Mendesak?</h2>
-    <p>Fitur ini menyediakan simulasi bantuan darurat cepat. Gunakan dengan bijak.</p>
-    <div class="ugd-buttons">
-        <button onclick="alert('Panggilan ke layanan darurat 112 (simulasi)');"><i class="fas fa-phone-alt"></i> Panggil Darurat</button>
-        <button onclick="alert('Kirim lokasi akurat Anda ke layanan terdekat (simulasi)');"><i class="fas fa-map-marker-alt"></i> Bagikan Lokasi Darurat</button>
-        <button onclick="alert('Kirim pesan otomatis ke 3 kontak darurat Anda (simulasi)');"><i class="fas fa-sms"></i> Kirim Pesan SOS</button>
-    </div>
+
+    <div class="status-section-title">Pembaruan Terbaru</div>
+    <div id="status-list">
+        </div>
   </div>
 
-  <div id="modal-backdrop">
-    <div id="modal-content">
-      <h3 id="modal-title"></h3>
-      <div id="modal-body"></div>
-      <div id="modal-actions">
-        <button class="cancel-btn" onclick="closeModal()">Batal</button>
-        <button id="modal-confirm-btn" class="confirm-btn"></button>
+  <div id="admin-control-screen" class="app-screen">
+      <div id="admin-header">
+            <button class="back-btn" id="back-from-admin"><i class="fas fa-arrow-left"></i></button>
+            <h2 class="app-title" style="flex-grow: 1; text-align: center;">Kontrol Admin</h2>
+            <div style="width: 2em;"></div> </div>
+      <div class="admin-section">
+          <h3>Manajemen Pengguna</h3>
+          <div class="admin-list" id="user-management-list">
+              </div>
+          <div class="admin-form">
+              <label for="new-user-username">Tambah Pengguna Baru:</label>
+              <input type="text" id="new-user-username" placeholder="Username" />
+              <input type="password" id="new-user-password" placeholder="Password" />
+              <button id="add-user-btn">Tambah Pengguna</button>
+          </div>
       </div>
+
+      <div class="admin-section">
+          <h3>Statistik Aplikasi (Simulasi)</h3>
+          <p>Total Pengguna: <span id="total-users-stat">0</span></p>
+          <p>Pesan Terkirim Hari Ini: <span id="messages-today-stat">0</span></p>
+          <p>Panggilan Berlangsung: <span id="active-calls-stat">0</span></p>
+      </div>
+  </div>
+
+  <div id="bottom-nav">
+    <div class="nav-item active" data-screen="main-chat-list-screen">
+      <i class="fas fa-comment"></i>
+      <span>Chat</span>
+    </div>
+    <div class="nav-item" data-screen="call-screen-nav">
+      <i class="fas fa-phone"></i>
+      <span>Panggilan</span>
+    </div>
+    <div class="nav-item" data-screen="status-screen">
+      <i class="fas fa-circle-notch"></i>
+      <span>Status</span>
+    </div>
+    <div class="nav-item" data-screen="admin-control-screen" id="admin-nav-item">
+      <i class="fas fa-user-shield"></i>
+      <span>Admin</span>
     </div>
   </div>
 
   <script>
-    // Request Notification permission on page load
-    Notification.requestPermission();
-
-    // Initial user data. Annas is admin.
-    let users = JSON.parse(localStorage.getItem('users')) || [
-      { username: 'annas', password: 'annas', displayName: 'Admin Annas', bio: 'Saya adalah Administrator Annas Chat.', role: 'admin', banned: false, profilePic: null, stats: { logins: 0, chatsSent: 0, chatsReceived: 0 } }
+    // --- Global State / Data (Simplified for client-side demo) ---
+    // User data, mimicking a simple database
+    let users = [
+        { id: 'u001', username: 'Annas', password: '123', isAdmin: true, statusMessage: 'Aktif dan siap membantu!', avatar: null },
+        { id: 'u002', username: 'Royalty', password: '123', isAdmin: false, statusMessage: '☕ Ngoding santai...', avatar: null },
+        { id: 'u003', username: 'Dlimas Alfiansyah', password: '123', isAdmin: false, statusMessage: 'Sedang mencari inspirasi...', avatar: null },
+        { id: 'u004', username: 'Nauvalsada Unesa', password: '123', isAdmin: false, statusMessage: 'Lagi fokus belajar.', avatar: null },
+        { id: 'u005', username: '+6289534479382', password: '123', isAdmin: false, statusMessage: 'Halo dunia!', avatar: null },
+        { id: 'u006', username: 'Gemar Kode', password: '123', isAdmin: false, statusMessage: 'Diskusi tentang teknologi.', avatar: null },
+        { id: 'u007', username: 'Suka Koding 2', password: '123', isAdmin: false, statusMessage: 'Membangun sesuatu yang keren.', avatar: null },
+        { id: 'u008', username: 'Komunitas IT Indonesia', password: '123', isAdmin: false, statusMessage: 'Berbagi ilmu.', avatar: null },
+        { id: 'u009', username: '+6288902885836', password: '123', isAdmin: false, statusMessage: 'Kopi dan kode.', avatar: null },
+        { id: 'u010', username: 'PHP Web Developer', password: '123', isAdmin: false, statusMessage: 'Framework favorit: Laravel.', avatar: null },
+        { id: 'u011', username: 'Member Baru 1', password: '123', isAdmin: false, statusMessage: 'Hai, saya baru!', avatar: null },
+        { id: 'u012', username: 'Member Baru 2', password: '123', isAdmin: false, statusMessage: 'Apa kabar?', avatar: null },
+        { id: 'u013', username: 'Member Baru 3', password: '123', isAdmin: false, statusMessage: 'Selamat datang!', avatar: null },
+        { id: 'u014', username: 'Tester Admin', password: '123', isAdmin: true, statusMessage: 'Menguji sistem.', avatar: null },
+        { id: 'u015', username: 'Guest User', password: '123', isAdmin: false, statusMessage: 'Sedang offline.', avatar: null },
     ];
-    let currentUser = null;
-    let activeReceiver = null;
-    let messages = JSON.parse(localStorage.getItem('messages')) || {}; // Store messages by sender-receiver pair
-    let reviewRequests = JSON.parse(localStorage.getItem('reviewRequests')) || []; // Store ban review requests
 
-    // --- Screen Management ---
+    let chats = [
+        {
+            id: 'chat_devtalk',
+            name: 'DevTalk Hub 2025',
+            lastMessage: 'Nauvalsada Unesa: tt https://vt.tiktok.com/ZSBeAvKpK/',
+            timestamp: '15.44',
+            unreadCount: 926,
+            isGroup: true,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u002', 'u003', 'u004', 'u005']
+        },
+        {
+            id: 'chat_kodinglife',
+            name: 'KodingLife',
+            lastMessage: 'Royalty: ☕ Open murbug Xpreskh Infinity (Versi terbaru) `...',
+            timestamp: '15.12',
+            unreadCount: 19,
+            isGroup: true,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u002', 'u006', 'u007']
+        },
+        {
+            id: 'chat_u005', // Direct chat with +62 895-3447-9382
+            name: '+62 895-3447-9382',
+            lastMessage: 'Wet',
+            timestamp: '14.17',
+            unreadCount: 0,
+            isGroup: false,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u005']
+        },
+        {
+            id: 'chat_komunitas_keseluruhan',
+            name: 'Komunitas Keseluruhan',
+            lastMessage: 'Coding Indonesia ▸ https://chat.whatsapp.com/JRD42HAPeJc...',
+            timestamp: '14',
+            unreadCount: 14,
+            isGroup: true,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u008', 'u009']
+        },
+        {
+            id: 'chat_gemar_kode',
+            name: 'Gemar Kode | Forum',
+            lastMessage: 'Dlimas Alfiansyah: Lucu bang, kalo gk salah itu grup yg isi ny...',
+            timestamp: '09.37',
+            unreadCount: 2,
+            isGroup: true,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u003', 'u006']
+        },
+        {
+            id: 'chat_suka_koding2',
+            name: 'Suka Koding 2',
+            lastMessage: 'CODING PEMULA ▸ +62 823-8639-1006 bergabung menggu...',
+            timestamp: '9',
+            unreadCount: 9,
+            isGroup: false,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u007']
+        },
+        {
+            id: 'chat_it_indonesia',
+            name: 'Komunitas IT Indonesia',
+            lastMessage: 'Pengumuman ▸ Gaes, udah aman kah dari para alomani tujuhh...',
+            timestamp: '7',
+            unreadCount: 0,
+            isGroup: true,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u008']
+        },
+        {
+            id: 'chat_annas_self', // Simulating own chat/info
+            name: 'Annas',
+            lastMessage: 'Anda menggunakan timer default untuk pesan sementara di chat...',
+            timestamp: '25/06',
+            unreadCount: 0,
+            isGroup: false,
+            isAdmin: true, // Example: Mark Annas as admin for the badge
+            avatar: null,
+            participants: ['u001']
+        },
+        {
+            id: 'chat_u009',
+            name: '+62 889-0288-5836',
+            lastMessage: '',
+            timestamp: '24/06',
+            unreadCount: 0,
+            isGroup: false,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u009']
+        },
+        {
+            id: 'chat_php_webdev',
+            name: 'PHP Web Developer Indonesia',
+            lastMessage: 'PHP Framewok ▸ +62 838-6744-8829 bergabung dari komu...',
+            timestamp: '0',
+            unreadCount: 0,
+            isGroup: true,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u010']
+        },
+        {
+            id: 'chat_pppp_1',
+            name: 'PPPPP - 1',
+            lastMessage: 'Anda yang membuat grup ini',
+            timestamp: '0',
+            unreadCount: 0,
+            isGroup: false,
+            isAdmin: false,
+            avatar: null,
+            participants: ['u001', 'u011']
+        }
+    ];
+
+    // Sample messages for each chat
+    let messages = {
+        'chat_annas_self': [
+            { senderId: 'info', text: 'Pesan dan panggilan terenkripsi secara end-to-end. Hanya orang di chat ini yang bisa membaca, mendengarkan, atau membagikannya.', type: 'info', timestamp: 'Rabu' },
+            { senderId: 'info', text: 'Anda menggunakan timer default untuk pesan sementara di chat baru. Pesan baru akan hilang dari chat ini 24 jam setelah dikirim, kecuali disimpan. Ketuk untuk menyetel timer default Anda sendiri', type: 'info', timestamp: '' },
+            { senderId: 'u001', text: 'Halo, ini Annas. Selamat datang di aplikasi chat demo saya!', type: 'text', timestamp: '10.00' }
+        ],
+        'chat_devtalk': [
+            { senderId: 'u004', text: 'tt https://vt.tiktok.com/ZSBeAvKpK/', type: 'text', timestamp: '15.44' },
+            { senderId: 'u001', text: 'Wah, link bagus!', type: 'text', timestamp: '15.45' }
+        ],
+        'chat_kodinglife': [
+            { senderId: 'u002', text: '☕ Open murbug Xpreskh Infinity (Versi terbaru) `...', type: 'text', timestamp: '15.12' },
+            { senderId: 'u006', text: 'Ada yang sudah coba?', type: 'text', timestamp: '15.15' }
+        ],
+        'chat_u005': [
+            { senderId: 'u005', text: 'Wet', type: 'text', timestamp: '14.17' },
+            { senderId: 'u001', text: 'Maksudnya?', type: 'text', timestamp: '14.20' }
+        ],
+        'chat_komunitas_keseluruhan': [
+            { senderId: 'u008', text: 'Coding Indonesia ▸ https://chat.whatsapp.com/JRD42HAPeJc...', type: 'text', timestamp: '14' },
+            { senderId: 'u001', text: 'Terima kasih informasinya!', type: 'text', timestamp: '14.05' }
+        ],
+        'chat_gemar_kode': [
+            { senderId: 'u003', text: 'Lucu bang, kalo gk salah itu grup yg isi ny...', type: 'text', timestamp: '09.37' },
+            { senderId: 'u006', text: 'Iya, betul sekali!', type: 'text', timestamp: '09.40' }
+        ],
+        'chat_suka_koding2': [
+            { senderId: 'info', text: 'CODING PEMULA ▸ +62 823-8639-1006 bergabung menggu...', type: 'info', timestamp: '9' },
+            { senderId: 'u001', text: 'Selamat datang!', type: 'text', timestamp: '09.05' }
+        ],
+        'chat_it_indonesia': [
+            { senderId: 'u008', text: 'Pengumuman ▸ Gaes, udah aman kah dari para alomani tujuhh...', type: 'text', timestamp: '7' },
+            { senderId: 'u001', text: 'Aman, min!', type: 'text', timestamp: '07.05' }
+        ],
+        'chat_u009': [
+            { senderId: 'u009', text: '...', type: 'text', timestamp: '24/06' },
+            { senderId: 'u001', text: 'Ada apa?', type: 'text', timestamp: '24/06' }
+        ],
+        'chat_php_webdev': [
+            { senderId: 'u010', text: 'PHP Framewok ▸ +62 838-6744-8829 bergabung dari komu...', type: 'text', timestamp: '0' },
+            { senderId: 'u001', text: 'Selamat datang di grup PHP!', type: 'text', timestamp: '00.05' }
+        ],
+        'chat_pppp_1': [
+            { senderId: 'info', text: 'Anda yang membuat grup ini', type: 'info', timestamp: '0' },
+            { senderId: 'u001', text: 'Halo semuanya!', type: 'text', timestamp: '00.05' }
+        ]
+    };
+
+    let statuses = [
+        { userId: 'u001', username: 'Annas', avatar: null, time: 'Baru saja', isSeen: false, content: 'Semangat ngoding hari ini! #developerlife' },
+        { userId: 'u002', username: 'Royalty', avatar: null, time: '10 menit yang lalu', isSeen: true, content: 'Kopi pagi terbaik ☕' },
+        { userId: 'u003', username: 'Dlimas Alfiansyah', avatar: null, time: '30 menit yang lalu', isSeen: false, content: 'Mood bagus buat koding hari ini.' },
+        { userId: 'u004', username: 'Nauvalsada Unesa', avatar: null, time: '1 jam yang lalu', isSeen: true, content: 'Belajar hal baru setiap hari.' },
+        { userId: 'u005', username: '+6289534479382', avatar: null, time: '2 jam yang lalu', isSeen: false, content: 'Jalan-jalan sore.' },
+    ];
+
+
+    let currentUser = null; // Stores logged-in user info
+    let activeChatId = null; // To keep track of which chat is open
+
+    // --- DOM Elements ---
+    const loadingScreen = document.getElementById('loading-screen');
+    const authScreen = document.getElementById('auth-screen');
+    const authTitle = document.getElementById('auth-title');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const toggleAuthLink = document.getElementById('toggle-auth');
+    const authMessage = document.getElementById('auth-message');
+
+    const mainChatListScreen = document.getElementById('main-chat-list-screen');
+    const chatListContent = document.getElementById('chat-list-content');
+    const fabChat = document.getElementById('fab-chat');
+    const promoBanner = document.getElementById('promo-banner');
+    const promoBannerCloseBtn = promoBanner?.querySelector('.close-btn');
+
+    const individualChatScreen = document.getElementById('individual-chat-screen');
+    const chatHeader = document.getElementById('chat-header');
+    const chatPartnerNameDisplay = document.getElementById('chat-partner-name-display');
+    const chatPartnerStatusDisplay = document.getElementById('chat-partner-status-display');
+    const chatPartnerAvatarDisplay = document.getElementById('chat-partner-avatar-display');
+    const backToChatsBtn = document.getElementById('back-to-chats');
+    const chatMessagesContainer = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendMessageBtn = document.getElementById('send-message-btn');
+    const callButton = document.getElementById('call-btn'); // Video call button
+
+    const callScreen = document.getElementById('call-screen');
+    const callingAvatar = document.getElementById('calling-avatar');
+    const callingName = document.getElementById('calling-name');
+    const callStatus = document.getElementById('call-status');
+    const endCallBtn = document.getElementById('end-call-btn');
+
+    const statusScreen = document.getElementById('status-screen');
+    const myStatusAvatar = statusScreen.querySelector('.my-status-avatar');
+    const addStatusIcon = myStatusAvatar?.querySelector('.add-status-icon');
+    const statusListContainer = document.getElementById('status-list');
+
+    const adminControlScreen = document.getElementById('admin-control-screen');
+    const adminNavItem = document.getElementById('admin-nav-item');
+    const backFromAdminBtn = document.getElementById('back-from-admin');
+    const userManagementList = document.getElementById('user-management-list');
+    const newUserUsernameInput = document.getElementById('new-user-username');
+    const newUserPasswordInput = document.getElementById('new-user-password');
+    const addUserBtn = document.getElementById('add-user-btn');
+    const totalUsersStat = document.getElementById('total-users-stat');
+    const messagesTodayStat = document.getElementById('messages-today-stat');
+    const activeCallsStat = document.getElementById('active-calls-stat');
+
+
+    // --- Helper Functions ---
+    function getInitials(name) {
+        if (!name) return '';
+        const parts = name.split(' ');
+        if (parts.length > 1) {
+            return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return parts[0][0].toUpperCase();
+    }
+
     function showScreen(screenId) {
         const screens = document.querySelectorAll('.app-screen');
         screens.forEach(screen => {
             if (screen.id === screenId) {
-                screen.classList.add('active');
-                screen.classList.remove('transition-out');
+                screen.style.display = 'flex'; // Make target visible
+                setTimeout(() => {
+                    screen.classList.add('active'); // Trigger transition
+                }, 10);
             } else {
                 screen.classList.remove('active');
-                screen.classList.add('transition-out');
+                // Give a small delay before hiding to allow transition out
+                setTimeout(() => {
+                    screen.style.display = 'none';
+                }, 400); // Should match CSS transition duration
             }
         });
-        // Deactivate all nav items then activate the current one
-        document.querySelectorAll('#bottom-nav .nav-item').forEach(item => item.classList.remove('active'));
-        const activeNavItem = document.querySelector(`#bottom-nav .nav-item[data-nav="${screenId.replace('-screen', '')}"]`);
-        if(activeNavItem) activeNavItem.classList.add('active');
     }
 
-    // Function to get current timestamp formatted
-    function getTimestamp() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        return `${hours}:${minutes}`;
+    function displayAuthMessage(message, isError = true) {
+        authMessage.textContent = message;
+        authMessage.style.color = isError ? 'var(--danger-color)' : 'var(--success-color)';
+        authMessage.style.display = 'block';
+        setTimeout(() => {
+            authMessage.style.display = 'none';
+        }, 3000);
     }
 
-    // --- Loading Screen ---
-    const hackerConsoleElement = document.getElementById('hacker-console');
-    const loadingTextElement = document.getElementById('loading-text');
+    // --- Authentication Logic ---
+    let isLoginMode = true; // State for login/register form
 
-    function showLoadingScreen() {
-        document.getElementById('loading-screen').classList.add('show');
-        hackerConsoleElement.innerText = ''; // Clear previous text
-        loadingTextElement.style.display = 'none'; // Hide text initially
+    function toggleAuthMode() {
+        isLoginMode = !isLoginMode;
+        authTitle.textContent = isLoginMode ? 'Login' : 'Daftar';
+        authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Daftar';
+        toggleAuthLink.textContent = isLoginMode ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login di sini';
+        usernameInput.value = '';
+        passwordInput.value = '';
+        authMessage.style.display = 'none';
+    }
 
-        const hackerScript = [
-            'Executing Annas Chat Protocol (ACP)...',
-            'Authenticating secure tunnel...',
-            '  [STATUS] Connection: SECURE (256-bit AES)',
-            '  [STATUS] Crypto-Module: ONLINE',
-            'Fetching encrypted user data...',
-            '  [PROGRESS] 30% User Profile Synced',
-            '  [PROGRESS] 70% Chat History Decrypted',
-            '  [STATUS] Data Integrity: VERIFIED',
-            'Loading UI/UX Frameworks...',
-            '  [INFO] Poppins.ttf loaded.',
-            '  [INFO] FontAwesome v6 loaded.',
-            '  [STATUS] Rendering Engine: OPTIMIZED',
-            'Applying real-time communication patches...',
-            '  [SUCCESS] All systems operational. Welcome!'
-        ];
+    function handleAuthSubmit() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
 
-        let lineIndex = 0;
-        let charIndex = 0;
-        let typingInterval;
+        if (!username || !password) {
+            displayAuthMessage('Username dan password tidak boleh kosong!');
+            return;
+        }
 
-        function typeLine() {
-            if (lineIndex < hackerScript.length) {
-                if (charIndex <= hackerScript[lineIndex].length) {
-                    hackerConsoleElement.innerText = hackerScript[lineIndex].substring(0, charIndex);
-                    charIndex++;
-                    typingInterval = setTimeout(typeLine, 25); // Faster typing
-                } else {
-                    hackerConsoleElement.innerText += '\n'; // New line after full line
-                    lineIndex++;
-                    charIndex = 0;
-                    typingInterval = setTimeout(typeLine, 80); // Pause before next line
-                }
+        if (isLoginMode) {
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                currentUser = user;
+                displayAuthMessage(`Selamat datang, ${currentUser.username}!`, false);
+                setTimeout(() => {
+                    showScreen('main-chat-list-screen');
+                    renderChatList();
+                    updateAdminControlsVisibility();
+                }, 500);
             } else {
-                clearInterval(typingInterval);
-                hackerConsoleElement.style.animation = 'none';
-                hackerConsoleElement.style.borderRight = 'none';
-                loadingTextElement.style.display = 'block'; // Show "Memuat Annas Chat..."
+                displayAuthMessage('Username atau password salah.');
+            }
+        } else {
+            // Register logic (for demo, just add to users array if unique)
+            if (users.some(u => u.username === username)) {
+                displayAuthMessage('Username sudah terdaftar. Gunakan yang lain.');
+            } else {
+                const newUser = {
+                    id: 'u' + (users.length + 1).toString().padStart(3, '0'), // Simple ID generation
+                    username: username,
+                    password: password,
+                    isAdmin: false,
+                    statusMessage: 'Hai, saya pengguna baru!',
+                    avatar: null
+                };
+                users.push(newUser);
+                displayAuthMessage('Pendaftaran berhasil! Silakan login.', false);
+                isLoginMode = true; // Switch to login mode after registration
+                toggleAuthMode(); // Update UI for login
             }
         }
-        typeLine();
     }
 
-    function hideLoadingScreen() {
-        document.getElementById('loading-screen').classList.remove('show');
-    }
+    // --- Chat List Logic ---
+    function renderChatList() {
+        chatListContent.innerHTML = ''; // Clear previous list
+        // Filter chats to only show those where currentUser is a participant, or all if admin
+        const accessibleChats = currentUser?.isAdmin
+            ? chats
+            : chats.filter(chat => chat.participants.includes(currentUser.id));
 
-    // --- Authentication Functions ---
-    function toggleAuthScreen(type) {
-      if (type === 'register') {
-        document.getElementById('register-card').style.display = 'block';
-        document.getElementById('login-card').style.display = 'none';
-        document.getElementById('register-card').style.animation = 'fadeInZoomIn 0.8s forwards ease-out';
-      } else { // type === 'login'
-        document.getElementById('register-card').style.display = 'none';
-        document.getElementById('login-card').style.display = 'block';
-        document.getElementById('login-card').style.animation = 'fadeInZoomIn 0.8s forwards ease-out';
-      }
-      document.getElementById('reg-msg').innerText = '';
-      document.getElementById('login-msg').innerText = '';
-    }
+        accessibleChats.forEach(chat => {
+            const item = document.createElement('div');
+            item.classList.add('chat-list-item');
+            item.dataset.chatId = chat.id;
 
-    function register() {
-      const displayName = document.getElementById('reg-display-name').value.trim();
-      const username = document.getElementById('reg-username').value.trim().toLowerCase(); // Store lowercase
-      const password = document.getElementById('reg-password').value.trim();
-      const bio = document.getElementById('reg-bio').value.trim();
+            // Determine display name and avatar for direct chats vs groups
+            let displayName = chat.name;
+            let displayAvatarContent;
 
-      if (!displayName || !username || !password) {
-        return document.getElementById('reg-msg').innerText = '⚠️ Nama panggilan, username & password harus diisi.';
-      }
-      if (password.length < 6) {
-        return document.getElementById('reg-msg').innerText = '⚠️ Password minimal 6 karakter.';
-      }
-      if (users.find(u => u.username === username)) {
-        return document.getElementById('reg-msg').innerText = '⚠️ Username sudah digunakan.';
-      }
-
-      users.push({ username: username, password: password, displayName: displayName, bio: bio, role: 'user', banned: false, profilePic: null, stats: { logins: 0, chatsSent: 0, chatsReceived: 0 } });
-      localStorage.setItem('users', JSON.stringify(users));
-      alert('✅ Akun berhasil dibuat! Silakan login.');
-      document.getElementById('reg-display-name').value = '';
-      document.getElementById('reg-username').value = '';
-      document.getElementById('reg-password').value = '';
-      document.getElementById('reg-bio').value = '';
-      toggleAuthScreen('login');
-    }
-
-    function login() {
-      const usernameInput = document.getElementById('login-username').value.trim().toLowerCase(); // Use lowercase for lookup
-      const password = document.getElementById('login-password').value.trim();
-      const user = users.find(u => u.username === usernameInput && u.password === password);
-
-      if (!user) {
-        return document.getElementById('login-msg').innerText = '⚠️ Username atau password salah. Mohon daftar jika belum punya akun.';
-      }
-      
-      currentUser = user; 
-      if (currentUser.banned) {
-        showRequestReviewModal(); 
-        return;
-      }
-
-      currentUser.stats.logins++;
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      showLoadingScreen();
-      setTimeout(() => { 
-        hideLoadingScreen();
-        showScreen('main-chat-list-screen'); // Show main chat list
-        refreshChatList();
-        
-        document.getElementById('login-username').value = '';
-        document.getElementById('login-password').value = '';
-      }, 4500); // Increased timeout for hacker effect
-    }
-
-    function logout() {
-      currentUser = null;
-      activeReceiver = null;
-      localStorage.removeItem('currentUser'); // Clear current user from session
-      showScreen('auth-screen'); // Go back to login
-      document.getElementById('login-msg').innerText = 'Anda telah berhasil logout.';
-      // Reset all screens
-      document.getElementById('chat-list-ul').innerHTML = '';
-      document.getElementById('chat-messages').innerHTML = '';
-      document.getElementById('chat-partner-name').innerText = '';
-      document.getElementById('chat-partner-status').innerText = '';
-      document.getElementById('chat-partner-avatar').innerHTML = '';
-      document.getElementById('call-screen').innerHTML = ''; // Clear call screen
-    }
-
-    // --- Main Chat List Screen Functions ---
-    function refreshChatList() {
-        const chatListUl = document.getElementById('chat-list-ul');
-        chatListUl.innerHTML = '';
-
-        // Add Gemini AI as a fixed chat item
-        const geminiLi = document.createElement('div');
-        geminiLi.className = 'chat-list-item';
-        geminiLi.onclick = () => startChat('gemini');
-        geminiLi.innerHTML = `
-            <div class="avatar" style="background-color: #555;"><i class="fas fa-robot"></i></div>
-            <div class="chat-info">
-                <span class="chat-name">Gemini AI <i class="fas fa-badge-check admin-badge" title="Official Bot" style="color: var(--verified-blue);"></i></span>
-                <span class="last-message">Asisten AI Anda.</span>
-            </div>
-            <div class="chat-meta">
-                <span class="timestamp" style="color: var(--success-color);">Online</span>
-            </div>
-        `;
-        chatListUl.appendChild(geminiLi);
-
-        // Add other users (excluding current user)
-        const usersToDisplay = users.filter(u => u.username !== currentUser.username && !u.banned); // Exclude banned users from list
-        usersToDisplay.sort((a, b) => a.displayName.localeCompare(b.displayName)); // Sort alphabetically
-
-        usersToDisplay.forEach(u => {
-            const li = document.createElement('div');
-            li.className = 'chat-list-item';
-            li.setAttribute('data-username', u.username);
-            li.onclick = () => startChat(u.username);
-            
-            const avatarContent = u.profilePic ? `<img src="${u.profilePic}" alt="PP">` : `<span class="initials">${u.displayName.charAt(0).toUpperCase()}</span>`;
-            let lastMessage = 'Belum ada pesan.';
-            let lastTimestamp = '';
-            const chatKey1 = `${currentUser.username}-${u.username}`;
-            const chatKey2 = `${u.username}-${currentUser.username}`;
-            const chatHistory = messages[chatKey1] || messages[chatKey2] || [];
-            if (chatHistory.length > 0) {
-                const lastMsg = chatHistory[chatHistory.length - 1];
-                lastMessage = lastMsg.type === 'text' ? lastMsg.content : `[${lastMsg.type.toUpperCase()}] File`;
-                lastMessage = lastMsg.length > 35 ? lastMessage.substring(0, 32) + '...' : lastMessage; // Shorter truncation
-                lastTimestamp = lastMsg.timestamp;
+            if (chat.isGroup) {
+                displayAvatarContent = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : getInitials(chat.name);
+            } else {
+                // For direct chats, find the other participant's info
+                const otherParticipantId = chat.participants.find(id => id !== currentUser.id);
+                const otherParticipant = users.find(u => u.id === otherParticipantId);
+                if (otherParticipant) {
+                    displayName = otherParticipant.username;
+                    displayAvatarContent = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+                } else {
+                    // Fallback if participant not found (shouldn't happen with proper data)
+                    displayAvatarContent = getInitials(chat.name);
+                }
             }
 
-            li.innerHTML = `
-                <div class="avatar">${avatarContent}</div>
+
+            item.innerHTML = `
+                <div class="avatar">${displayAvatarContent}</div>
                 <div class="chat-info">
-                    <span class="chat-name">
-                        ${u.displayName}
-                        ${u.role === 'admin' ? '<i class="fas fa-badge-check admin-badge" title="Admin Terverifikasi"></i>' : ''}
-                    </span>
-                    <span class="last-message">${lastMessage}</span>
+                    <div class="chat-name">
+                        ${displayName}
+                        ${chat.isAdmin ? '<i class="fas fa-check-circle admin-badge"></i>' : ''}
+                    </div>
+                    <div class="last-message">${chat.lastMessage}</div>
                 </div>
                 <div class="chat-meta">
-                    <span class="timestamp">${lastTimestamp}</span>
-                    </div>
+                    <span class="timestamp">${chat.timestamp}</span>
+                    ${chat.unreadCount > 0 ? `<span class="unread-count">${chat.unreadCount}</span>` : ''}
+                </div>
             `;
-            chatListUl.appendChild(li);
+            chatListContent.appendChild(item);
+
+            item.addEventListener('click', () => openIndividualChat(chat.id));
         });
     }
 
-    function showNewChatContacts() {
-        const otherUsers = users.filter(u => u.username !== currentUser.username && !u.banned && u.username !== 'gemini');
-        if (otherUsers.length === 0) {
-            openModal('Kontak Baru', '<p>Tidak ada kontak lain yang tersedia untuk chat baru.</p>', 'Tutup', null);
-            return;
-        }
+    // --- Individual Chat Logic ---
+    function renderMessages(chatId) {
+        chatMessagesContainer.innerHTML = ''; // Clear previous messages
+        const chatMessages = messages[chatId] || [];
 
-        const contactsList = otherUsers.map(u => `
-            <div class="chat-list-item" onclick="startChat('${u.username}'); closeModal();">
-                <div class="avatar">${u.profilePic ? `<img src="${u.profilePic}" alt="PP">` : `<span class="initials">${u.displayName.charAt(0).toUpperCase()}</span>`}</div>
-                <div class="chat-info">
-                    <span class="chat-name">
-                        ${u.displayName}
-                        ${u.role === 'admin' ? '<i class="fas fa-badge-check admin-badge" title="Admin Terverifikasi"></i>' : ''}
-                    </span>
-                    <span class="last-message">${u.bio || 'Pengguna Annas Chat'}</span>
-                </div>
-            </div>
-        `).join('');
+        chatMessages.forEach(msg => {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message-bubble');
 
-        openModal('Mulai Chat Baru', `
-            <p style="color:var(--text-muted); margin-bottom: 15px;">Pilih kontak untuk memulai percakapan:</p>
-            <div class="modal-scrollable-content">${contactsList}</div>
-        `, 'Tutup', null);
-        document.getElementById('modal-confirm-btn').style.display = 'none'; // Hide confirm, only "Tutup" is needed
-    }
-
-
-    // --- Individual Chat Screen Functions ---
-    function startChat(username) {
-        activeReceiver = username;
-        document.getElementById('chat-messages').innerHTML = '';
-        document.getElementById('msg-input').value = '';
-
-        const targetUser = users.find(u => u.username === username);
-        if (username === 'gemini') {
-            document.getElementById('chat-partner-name').innerHTML = 'Gemini AI <i class="fas fa-badge-check admin-badge" title="Official Bot" style="color: var(--verified-blue);"></i>';
-            document.getElementById('chat-partner-avatar').innerHTML = '<i class="fas fa-robot"></i>';
-            document.getElementById('chat-partner-status').innerText = 'Online';
-        } else if (targetUser) {
-            const avatarContent = targetUser.profilePic ? `<img src="${targetUser.profilePic}" alt="PP">` : `<span class="initials">${targetUser.displayName.charAt(0).toUpperCase()}</span>`;
-            document.getElementById('chat-partner-name').innerHTML = `${targetUser.displayName} ${targetUser.role === 'admin' ? '<i class="fas fa-badge-check admin-badge" title="Admin Terverifikasi"></i>' : ''}`;
-            document.getElementById('chat-partner-avatar').innerHTML = avatarContent;
-            document.getElementById('chat-partner-status').innerText = targetUser.bio || 'Online';
-        } else {
-            // This happens for the FAB new chat, or if a user is not found
-            document.getElementById('chat-partner-name').innerText = 'Pilih Pengguna untuk Chat';
-            document.getElementById('chat-partner-avatar').innerHTML = '<i class="fas fa-user"></i>';
-            document.getElementById('chat-partner-status').innerText = '';
-        }
-        
-        loadMessages();
-        showScreen('individual-chat-screen');
-        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-        
-        // Change send button to microphone for initial state
-        const sendButton = document.querySelector('#chat-input-bar .mic-send-button');
-        sendButton.innerHTML = '<i class="fas fa-microphone"></i>';
-        sendButton.onclick = () => alert('Fitur rekam suara (simulasi).');
-
-        // Update send button based on input
-        document.getElementById('msg-input').oninput = function() {
-            if (this.value.trim() === '') {
-                sendButton.innerHTML = '<i class="fas fa-microphone"></i>';
-                sendButton.onclick = () => alert('Fitur rekam suara (simulasi).');
+            let senderName = '';
+            if (msg.senderId === 'info') {
+                messageElement.classList.add('info');
             } else {
-                sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
-                sendButton.onclick = sendMessage;
+                const senderUser = users.find(u => u.id === msg.senderId);
+                senderName = senderUser ? senderUser.username : 'Unknown';
+                if (msg.senderId === currentUser.id) {
+                    messageElement.classList.add('sent');
+                } else {
+                    messageElement.classList.add('received');
+                }
             }
-        };
+
+            messageElement.innerHTML = `
+                ${msg.type !== 'info' && activeChatId.includes('chat_') ? `<span class="message-sender">${senderName}</span>` : ''}
+                <p>${msg.text}</p>
+                <span class="message-timestamp">${msg.timestamp}</span>
+            `;
+            chatMessagesContainer.appendChild(messageElement);
+        });
+        // Scroll to bottom
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
 
-    function saveMessages() {
-      localStorage.setItem('messages', JSON.stringify(messages));
-    }
-
-    function loadMessages() {
-      document.getElementById('chat-messages').innerHTML = `
-        <div class="e2e-notice">
-            <i class="fas fa-shield-alt"></i> Chat ini terenkripsi end-to-end. Ketuk untuk detail.
-        </div>
-        <div class="e2e-notice" style="margin-top: 10px;">
-            <i class="fas fa-hourglass-half"></i> Pesan baru akan hilang dalam 24 jam. Ketuk untuk mengubah.
-        </div>
-      `; // Always show these notices
-      const chatKey1 = `${currentUser.username}-${activeReceiver}`;
-      const chatKey2 = `${activeReceiver}-${currentUser.username}`;
-      const chatHistory = messages[chatKey1] || messages[chatKey2] || [];
-
-      chatHistory.forEach(msg => {
-        appendMessageToChat(msg);
-      });
-      document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-    }
-
-    function appendMessageToChat(msg) {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `msg-bubble ${msg.sender === currentUser.username ? 'msg-user' : 'msg-bot'}`;
-        
-        if (msg.type === 'text') {
-            msgDiv.innerText = msg.content;
-        } else if (msg.type === 'image') {
-            msgDiv.innerHTML = `<img src="${msg.content}" alt="Gambar">`;
-        } else if (msg.type === 'audio') {
-            msgDiv.innerHTML = `<audio controls src="${msg.content}"></audio>`;
-        } else if (msg.type === 'video') {
-            msgDiv.innerHTML = `<video controls src="${msg.content}"></video>`;
-        }
-        
-        const timestampSpan = document.createElement('span');
-        timestampSpan.className = 'msg-timestamp';
-        timestampSpan.innerText = msg.timestamp;
-        msgDiv.appendChild(timestampSpan);
-
-        document.getElementById('chat-messages').appendChild(msgDiv);
-    }
-
-    function handleKeyPress(event) {
-        if (event.key === 'Enter') {
-            sendMessage();
-            event.preventDefault(); 
+    function sendMessage() {
+        const messageText = chatInput.value.trim();
+        if (messageText && activeChatId) {
+            if (!messages[activeChatId]) {
+                messages[activeChatId] = [];
+            }
+            messages[activeChatId].push({
+                senderId: currentUser.id,
+                text: messageText,
+                timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                type: 'text'
+            });
+            chatInput.value = '';
+            renderMessages(activeChatId);
         }
     }
 
-    async function sendMessage() {
-      const msgInput = document.getElementById('msg-input');
-      const fileInput = document.getElementById('file-input');
-      const msg = msgInput.value.trim();
-      const file = fileInput.files[0];
+    function openIndividualChat(chatId) {
+        activeChatId = chatId;
+        const chat = chats.find(c => c.id === chatId);
+        if (chat) {
+            let partnerName = chat.name;
+            let partnerAvatarContent;
+            let partnerStatus = 'Online';
 
-      if (!msg && !file) return;
-      if (!activeReceiver) {
-        alert('⚠️ Pilih pengguna atau Gemini AI untuk memulai chat.');
-        return;
-      }
-      
-      currentUser.stats.chatsSent++;
-      localStorage.setItem('users', JSON.stringify(users));
+            if (chat.isGroup) {
+                partnerAvatarContent = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : getInitials(chat.name);
+                partnerStatus = `${chat.participants.length} Anggota`;
+            } else {
+                const otherParticipantId = chat.participants.find(id => id !== currentUser.id);
+                const otherParticipant = users.find(u => u.id === otherParticipantId);
+                if (otherParticipant) {
+                    partnerName = otherParticipant.username;
+                    partnerAvatarContent = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+                    partnerStatus = otherParticipant.statusMessage || 'Online';
+                }
+            }
 
-      const chatKey = `${currentUser.username}-${activeReceiver}`;
-      // Ensure chat history exists for both sender-receiver and receiver-sender to handle lookup
-      if (!messages[chatKey] && !messages[`${activeReceiver}-${currentUser.username}`]) {
-          messages[chatKey] = [];
-      } else if (!messages[chatKey]) {
-          // If only receiver-sender exists, use that key
-          messages[chatKey] = messages[`${activeReceiver}-${currentUser.username}`];
-          delete messages[`${activeReceiver}-${currentUser.username}`]; // Clean up
-      }
+            chatPartnerNameDisplay.textContent = partnerName;
+            // Dynamically add admin badge if applicable for the chat itself (e.g. if a group is admin-managed)
+            if (chat.isAdmin) {
+                if (!chatPartnerNameDisplay.querySelector('.admin-badge')) {
+                    const badge = document.createElement('i');
+                    badge.classList.add('fas', 'fa-check-circle', 'admin-badge');
+                    chatPartnerNameDisplay.appendChild(badge);
+                }
+            } else {
+                const existingBadge = chatPartnerNameDisplay.querySelector('.admin-badge');
+                if (existingBadge) existingBadge.remove();
+            }
 
+            chatPartnerAvatarDisplay.innerHTML = partnerAvatarContent;
+            chatPartnerStatusDisplay.textContent = partnerStatus;
 
-      const currentTimestamp = getTimestamp();
-
-      if (msg) {
-        const messageObject = { sender: currentUser.username, receiver: activeReceiver, type: 'text', content: msg, timestamp: currentTimestamp };
-        messages[chatKey].push(messageObject);
-        appendMessageToChat(messageObject);
-        new Notification(`📨 Pesan dari ${currentUser.displayName}`, { body: msg, icon: 'https://cdn-icons-png.flaticon.com/512/732/732200.png' });
-      }
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const fileContent = e.target.result;
-          let fileType = 'unknown';
-          if (file.type.startsWith('image')) fileType = 'image';
-          else if (file.type.startsWith('audio')) fileType = 'audio';
-          else if (file.type.startsWith('video')) fileType = 'video';
-
-          const messageObject = { sender: currentUser.username, receiver: activeReceiver, type: fileType, content: fileContent, timestamp: currentTimestamp };
-          messages[chatKey].push(messageObject);
-          appendMessageToChat(messageObject);
-          saveMessages();
-          new Notification(`📨 File dari ${currentUser.displayName}`, { body: `Mengirim ${fileType}`, icon: 'https://cdn-icons-png.flaticon.com/512/732/732200.png' });
+            showScreen('individual-chat-screen');
+            renderMessages(chatId);
         }
-        reader.readAsDataURL(file);
-      }
-      
-      saveMessages();
-      msgInput.value = '';
-      fileInput.value = ''; 
-      document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-
-      // Reset input button to mic
-      const sendButton = document.querySelector('#chat-input-bar .mic-send-button');
-      sendButton.innerHTML = '<i class="fas fa-microphone"></i>';
-      sendButton.onclick = () => alert('Fitur rekam suara (simulasi).');
-
-
-      // Handle Gemini AI replies
-      if (activeReceiver === 'gemini') {
-        const reply = await geminiReply(msg);
-        const geminiMessageObject = { sender: activeReceiver, receiver: currentUser.username, type: 'text', content: reply, timestamp: getTimestamp() };
-        
-        messages[chatKey].push(geminiMessageObject);
-        appendMessageToChat(geminiMessageObject);
-        saveMessages();
-        new Notification('🤖 Gemini Membalas', { body: reply, icon: 'https://www.gstatic.com/images/branding/product/2x/gemini_2023_color_256dp.png' });
-      } else {
-        const receiverUser = users.find(u => u.username === activeReceiver);
-        if (receiverUser) {
-          receiverUser.stats.chatsReceived++;
-          localStorage.setItem('users', JSON.stringify(users));
-        }
-      }
-      if (currentUser.role === 'admin') showAdminStats();
-      refreshChatList(); // Update last message in chat list
     }
 
-    async function geminiReply(prompt) {
-      if (!prompt) return 'Hai! Ada yang bisa saya bantu?';
-      try {
-        const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY'; // GANTI DENGAN API KEY GEMINI ASLI ANDA
-        if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-          return '⚠️ Harap ganti "YOUR_GEMINI_API_KEY" dengan kunci API Gemini yang valid untuk menggunakan fitur ini.';
-        }
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-          }
-        );
-        const data = await res.json();
-        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || '❌ Tidak bisa membalas';
-        return replyText;
-      } catch (e) {
-        console.error('Gemini API Error:', e);
-        return '❌ Gagal koneksi ke Gemini API atau terjadi kesalahan. Pastikan API key Anda benar.';
-      }
-    }
-
-    // --- Call Screen Functions ---
-    function showCallContacts() {
-        const otherUsers = users.filter(u => u.username !== currentUser.username && !u.banned && u.username !== 'gemini');
-        if (otherUsers.length === 0) {
-            openModal('Mulai Panggilan', '<p>Tidak ada kontak yang tersedia untuk panggilan.</p>', 'Tutup', null);
-            return;
+    // --- Call Screen Logic ---
+    function startCall(partnerChatId) {
+        let partnerName = 'Unknown';
+        let partnerAvatar = '';
+        if (partnerChatId) {
+            const chat = chats.find(c => c.id === partnerChatId);
+            if (chat && !chat.isGroup) { // Only direct calls for now
+                const otherParticipantId = chat.participants.find(id => id !== currentUser.id);
+                const otherParticipant = users.find(u => u.id === otherParticipantId);
+                if (otherParticipant) {
+                    partnerName = otherParticipant.username;
+                    partnerAvatar = otherParticipant.avatar ? `<img src="${otherParticipant.avatar}" alt="${otherParticipant.username}" />` : getInitials(otherParticipant.username);
+                }
+            } else if (chat && chat.isGroup) { // For groups, just use group name/avatar
+                partnerName = chat.name;
+                partnerAvatar = chat.avatar ? `<img src="${chat.avatar}" alt="${chat.name}" />` : getInitials(chat.name);
+            }
         }
 
-        const contactsList = otherUsers.map(u => `
-            <div class="chat-list-item" onclick="showCallScreen('audio', '${u.username}'); closeModal();">
-                <div class="avatar">${u.profilePic ? `<img src="${u.profilePic}" alt="PP">` : `<span class="initials">${u.displayName.charAt(0).toUpperCase()}</span>`}</div>
-                <div class="chat-info">
-                    <span class="chat-name">
-                        ${u.displayName}
-                        ${u.role === 'admin' ? '<i class="fas fa-badge-check admin-badge" title="Admin Terverifikasi"></i>' : ''}
-                    </span>
-                    <span class="last-message">Ketuk untuk Panggilan Suara</span>
-                </div>
-                <div class="chat-meta"><i class="fas fa-phone-alt" style="font-size:1.5em; color:var(--accent-purple);"></i></div>
-            </div>
-        `).join('');
-
-        openModal('Mulai Panggilan', `
-            <p style="color:var(--text-muted); margin-bottom: 15px;">Pilih kontak untuk melakukan panggilan:</p>
-            <div class="modal-scrollable-content">${contactsList}</div>
-        `, 'Tutup', null);
-        document.getElementById('modal-confirm-btn').style.display = 'none';
-    }
-
-
-    function showCallScreen(type, targetUsername = activeReceiver) {
-        const targetUser = users.find(u => u.username === targetUsername);
-        const targetName = targetUser ? targetUser.displayName : 'Pengguna Tidak Dikenal';
-        
-        if (!targetUser || targetUsername === 'gemini') {
-            alert('Pilih pengguna lain untuk melakukan panggilan.');
-            return;
-        }
-
-        const avatarContent = targetUser.profilePic ? `<img src="${targetUser.profilePic}" alt="PP">` : `<span class="initials">${targetUser.displayName.charAt(0).toUpperCase()}</span>`;
-        document.getElementById('call-partner-avatar-lg').innerHTML = avatarContent;
-        document.getElementById('call-partner-name-lg').innerText = targetName;
-        document.getElementById('call-status-text').innerText = `Menghubungkan... (${type === 'video' ? 'Video Call' : 'Voice Call'})`;
-
+        callingName.textContent = `Memanggil ${partnerName}...`;
+        callingAvatar.innerHTML = partnerAvatar;
+        callStatus.textContent = 'Menghubungkan...';
         showScreen('call-screen');
+
+        // Simulate call connection
+        setTimeout(() => {
+            callStatus.textContent = 'Berdering...';
+        }, 2000);
+        setTimeout(() => {
+            callStatus.textContent = `Panggilan dengan ${partnerName} Berlangsung`;
+            activeCallsStat.textContent = parseInt(activeCallsStat.textContent) + 1;
+        }, 5000);
     }
 
     function endCall() {
         alert('Panggilan diakhiri.');
-        showScreen('individual-chat-screen'); // Return to the individual chat screen
+        showScreen('main-chat-list-screen'); // Return to main chat list
+        activeCallsStat.textContent = Math.max(0, parseInt(activeCallsStat.textContent) - 1);
     }
 
-    function showContactProfile(username) {
-        const user = users.find(u => u.username === username);
-        if (!user) {
-            alert('Pengguna tidak ditemukan.');
+    // --- Status Screen Logic ---
+    function renderStatusList() {
+        statusListContainer.innerHTML = ''; // Clear previous list
+
+        const myStatusUser = users.find(u => u.id === currentUser.id);
+        if (myStatusUser) {
+            myStatusAvatar.innerHTML = myStatusUser.avatar ? `<img src="${myStatusUser.avatar}" alt="${myStatusUser.username}" />` : getInitials(myStatusUser.username);
+            myStatusAvatar.querySelector('.add-status-icon').style.display = 'flex'; // Ensure plus icon is visible
+            myStatusAvatar.nextElementSibling.querySelector('h3').textContent = 'Status Saya';
+            myStatusAvatar.nextElementSibling.querySelector('p').textContent = myStatusUser.statusMessage || 'Ketuk untuk memperbarui status';
+        }
+
+        const recentStatuses = statuses.filter(s => s.userId !== currentUser.id); // Exclude own status for 'Recent Updates'
+        if (recentStatuses.length === 0) {
+            statusListContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 30px;">Tidak ada pembaruan status terbaru.</p>';
             return;
         }
 
-        const profilePicHtml = user.profilePic ? `<img src="${user.profilePic}" alt="PP" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border: 4px solid var(--accent-purple); margin-bottom: 15px;">` : `<div class="profile-pic-preview" style="width:120px; height:120px; margin-bottom:15px; border: 4px solid var(--accent-purple);"><span class="initials" style="font-size:3.5em;">${user.displayName.charAt(0).toUpperCase()}</span></div>`;
+        recentStatuses.forEach(status => {
+            const user = users.find(u => u.id === status.userId);
+            if (!user) return; // Skip if user not found
 
-        openModal(`Profil ${user.displayName}`, `
-            <div style="text-align:center; display: flex; flex-direction: column; align-items: center;">
-                ${profilePicHtml}
-                <h4 style="color:var(--accent-purple); margin-bottom: 5px;">${user.displayName} ${user.role === 'admin' ? '<i class="fas fa-badge-check admin-badge" title="Admin Terverifikasi" style="font-size: 0.9em;"></i>' : ''}</h4>
-                <p style="color:var(--text-muted); font-size:0.9em; margin-bottom: 15px;">@${user.username}</p>
-                <p style="color:var(--text-light); text-align:center; background: var(--accent-blue); padding: 12px; border-radius: 10px; width: 90%; margin-top: 10px;">${user.bio || 'Tidak ada bio.'}</p>
-            </div>
-            <div style="display:flex; justify-content:center; gap:15px; margin-top:25px;">
-                <button style="width:auto; padding:12px 20px; font-size:1em;" onclick="showCallScreen('audio', '${user.username}'); closeModal();"><i class="fas fa-phone"></i> Panggilan</button>
-                <button style="width:auto; padding:12px 20px; font-size:1em;" onclick="showCallScreen('video', '${user.username}'); closeModal();"><i class="fas fa-video"></i> Video Call</button>
-            </div>
-        `, 'Tutup', null);
-        document.getElementById('modal-confirm-btn').style.display = 'none';
-        document.querySelector('#modal-actions .cancel-btn').innerText = 'Tutup';
-        document.querySelector('#modal-actions .cancel-btn').onclick = closeModal;
-    }
+            const item = document.createElement('div');
+            item.classList.add('status-item');
+            item.dataset.userId = user.id;
 
+            const avatarContent = user.avatar ? `<img src="${user.avatar}" alt="${user.username}" />` : getInitials(user.username);
+            const statusClass = status.isSeen ? '' : 'unseen';
 
-    // --- Admin & User Controls Screen ---
-    function showUserAdminControls() {
-        showScreen('admin-user-controls-screen');
-        if (currentUser.role === 'admin') {
-            document.getElementById('admin-controls-panel').style.display = 'block';
-            showAdminStats();
-        } else {
-            document.getElementById('admin-controls-panel').style.display = 'none';
-        }
-        document.getElementById('user-controls-panel').style.display = 'block';
-    }
-
-    function showAdminStats() {
-      let statsDiv = document.getElementById('admin-stats');
-      let totalLogins = users.reduce((sum, u) => sum + u.stats.logins, 0);
-      let totalChatsSent = users.reduce((sum, u) => sum + u.stats.chatsSent, 0);
-      let totalChatsReceived = users.reduce((sum, u) => sum + u.stats.chatsReceived, 0);
-      
-      statsDiv.innerHTML = `
-        📊 <b>Statistik Umum Aplikasi:</b><br>
-        👥 Total Akun Terdaftar: <b>${users.length}</b><br>
-        🕒 Total Sesi Login: <b>${totalLogins}</b><br>
-        💬 Total Pesan Terkirim: <b>${totalChatsSent}</b><br>
-        📥 Total Pesan Diterima: <b>${totalChatsReceived}</b><br>
-        ✉️ Permintaan Banding Tertunda: <b>${reviewRequests.length}</b>
-      `;
-      statsDiv.style.display = 'block';
-    }
-
-    function showAllUserStats() {
-      openModal('Statistik Pengguna Lengkap', `
-        <p style="color:var(--text-muted); margin-bottom: 15px; text-align: center;">Daftar lengkap pengguna dan statistik aktivitas mereka.</p>
-        <div class="modal-scrollable-content">
-          <table style="width:100%; border-collapse: collapse; font-size: 0.9em; margin-top: 10px;">
-            <thead>
-              <tr style="background-color: var(--accent-blue);">
-                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left; border-top-left-radius: 8px;">Username</th>
-                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Nama</th>
-                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Role</th>
-                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Login</th>
-                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Kirim</th>
-                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Terima</th>
-                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left; border-top-right-radius: 8px;">Blokir</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${users.map(u => `
-                <tr style="${u.banned ? 'background-color: #4A2E2E;' : ''}">
-                  <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.05);">${u.username}</td>
-                  <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.05);">${u.displayName}</td>
-                  <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.05);">${u.role}</td>
-                  <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.05);">${u.stats.logins}</td>
-                  <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.05);">${u.stats.chatsSent}</td>
-                  <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.05);">${u.stats.chatsReceived}</td>
-                  <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.05); color: ${u.banned ? 'var(--danger-color)' : 'var(--success-color)'}; font-weight: bold;">${u.banned ? 'Ya' : 'Tidak'}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `, 'Tutup', null);
-      document.getElementById('modal-confirm-btn').style.display = 'none'; // Hide default confirm button
-      document.querySelector('#modal-actions .cancel-btn').innerText = 'Tutup';
-      document.querySelector('#modal-actions .cancel-btn').onclick = closeModal;
-    }
-
-    function showBanUserModal() {
-      const banOptions = users.filter(u => u.username !== currentUser.username && u.role !== 'admin' && !u.banned)
-                               .map(u => `<option value="${u.username}">${u.displayName} (${u.username})</option>`).join('');
-      const unbanOptions = users.filter(u => u.banned)
-                                 .map(u => `<option value="${u.username}">${u.displayName} (${u.username})</option>`).join('');
-      
-      openModal('Kelola Pemblokiran Akun', `
-        <div style="margin-bottom: 25px;">
-            <p style="color: var(--text-light);">Pilih pengguna yang ingin Anda <b style="color:var(--danger-color);">blokir</b> permanen:</p>
-            <select id="ban-user-select" style="width:100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 10px; background-color: var(--accent-blue); color: var(--text-light);">
-              ${banOptions || '<option value="">Tidak ada pengguna untuk diblokir</option>'}
-            </select>
-            <button class="danger" style="margin-top: 20px; background: ${banOptions ? 'var(--danger-color)' : '#555'};" ${!banOptions ? 'disabled' : ''} onclick="confirmBanUser()">
-                <i class="fas fa-user-slash"></i> Blokir Pengguna Ini
-            </button>
-        </div>
-        <div>
-            <p style="color: var(--text-light);">Pilih pengguna yang ingin Anda <b style="color:var(--success-color);">buka blokirnya</b>:</p>
-            <select id="unban-user-select" style="width:100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 10px; background-color: var(--accent-blue); color: var(--text-light);">
-              ${unbanOptions || '<option value="">Tidak ada pengguna yang diblokir</option>'}
-            </select>
-            <button class="success" style="margin-top: 20px; background: ${unbanOptions ? 'var(--success-color)' : '#555'};" ${!unbanOptions ? 'disabled' : ''} onclick="confirmUnbanUser()">
-                <i class="fas fa-check-circle"></i> Buka Blokir Pengguna Ini
-            </button>
-        </div>
-      `, 'Tutup', null); 
-      document.getElementById('modal-confirm-btn').style.display = 'none'; 
-      document.querySelector('#modal-actions .cancel-btn').innerText = 'Tutup';
-      document.querySelector('#modal-actions .cancel-btn').onclick = closeModal;
-    }
-
-    function confirmBanUser() {
-        const selectElement = document.getElementById('ban-user-select');
-        if (!selectElement || !selectElement.value) {
-            alert('Pilih pengguna yang valid untuk diblokir.');
-            return;
-        }
-        const usernameToBan = selectElement.value;
-        const userIndex = users.findIndex(u => u.username === usernameToBan);
-        if (userIndex > -1) {
-            if (confirm(`Anda yakin ingin memblokir pengguna ${users[userIndex].displayName} (${usernameToBan}) secara permanen?`)) {
-                users[userIndex].banned = true;
-                localStorage.setItem('users', JSON.stringify(users));
-                alert(`Pengguna ${users[userIndex].displayName} berhasil diblokir.`);
-                
-                // Send notification message to banned user from admin
-                const adminUser = users.find(u => u.role === 'admin');
-                const adminUsername = adminUser ? adminUser.username : 'admin';
-
-                const chatKey = `${adminUsername}-${usernameToBan}`; 
-                if (!messages[chatKey]) messages[chatKey] = [];
-                messages[chatKey].push({
-                    sender: adminUsername, 
-                    receiver: usernameToBan,
-                    type: 'text',
-                    content: 'Pesan Sistem Admin: Akun Anda telah diblokir secara permanen karena pelanggaran kebijakan. Anda dapat mengajukan banding melalui layar login.',
-                    timestamp: getTimestamp()
-                });
-                saveMessages();
-
-                refreshChatList(); // Update chat list to remove banned user
-                showAdminStats();
-                closeModal(); 
-            }
-        }
-    }
-
-    function confirmUnbanUser() {
-        const selectElement = document.getElementById('unban-user-select');
-        if (!selectElement || !selectElement.value) {
-            alert('Pilih pengguna yang valid untuk dibuka blokirnya.');
-            return;
-        }
-        const usernameToUnban = selectElement.value;
-        const userIndex = users.findIndex(u => u.username === usernameToUnban);
-        if (userIndex > -1) {
-            if (confirm(`Anda yakin ingin membuka blokir pengguna ${users[userIndex].displayName} (${usernameToUnban})?`)) {
-                users[userIndex].banned = false;
-                localStorage.setItem('users', JSON.stringify(users));
-                alert(`Pengguna ${users[userIndex].displayName} berhasil dibuka blokirnya.`);
-
-                // Send notification message to unbanned user from admin
-                const adminUser = users.find(u => u.role === 'admin');
-                const adminUsername = adminUser ? adminUser.username : 'admin';
-
-                const chatKey = `${adminUsername}-${usernameToUnban}`; 
-                if (!messages[chatKey]) messages[chatKey] = [];
-                messages[chatKey].push({
-                    sender: adminUsername, 
-                    receiver: usernameToUnban,
-                    type: 'text',
-                    content: 'Pesan Sistem Admin: Akun Anda telah berhasil dibuka oleh administrator. Selamat datang kembali!',
-                    timestamp: getTimestamp()
-                });
-                saveMessages();
-
-                refreshChatList(); // Update chat list to show user
-                showAdminStats();
-                closeModal(); 
-            }
-        }
-    }
-
-    function showDeleteUserModal() {
-      const userOptions = users.filter(u => u.username !== currentUser.username && u.role !== 'admin')
-                               .map(u => `<option value="${u.username}">${u.displayName} (${u.username})</option>`).join('');
-      if (!userOptions) {
-        alert('Tidak ada pengguna yang bisa dihapus.');
-        return;
-      }
-      openModal('Hapus Akun Permanen', `
-        <p style="color: var(--danger-color); font-weight: bold; text-align: center;"><i class="fas fa-exclamation-triangle"></i> PERINGATAN! Aksi ini tidak dapat dibatalkan. Semua data chat pengguna ini akan hilang.</p>
-        <p style="color: var(--text-light); margin-top: 20px;">Pilih pengguna yang ingin Anda hapus secara permanen:</p>
-        <select id="delete-user-select" style="background-color: var(--accent-blue); color: var(--text-light); border: 1px solid var(--border-color); margin-top: 10px;">
-          ${userOptions}
-        </select>
-      `, 'Hapus Permanen', () => {
-        const usernameToDelete = document.getElementById('delete-user-select').value;
-        const userIndex = users.findIndex(u => u.username === usernameToDelete);
-        if (userIndex > -1) {
-          if (confirm(`ANDA YAKIN INGIN MENGHAPUS PENGGUNA ${users[userIndex].displayName} (${usernameToDelete}) BESERTA SEMUA DATANYA SECARA PERMANEN? TINDAKAN INI TIDAK DAPAT DIBATALKAN!`)) {
-            users.splice(userIndex, 1);
-            for (const key in messages) {
-              if (key.includes(usernameToDelete)) {
-                delete messages[key];
-              }
-            }
-            localStorage.setItem('users', JSON.stringify(users));
-            saveMessages();
-            alert(`Pengguna ${usernameToDelete} berhasil dihapus secara permanen.`);
-            refreshChatList();
-            showAdminStats();
-            if (activeReceiver === usernameToDelete) {
-                activeReceiver = null;
-                showScreen('main-chat-list-screen'); // Go back to main list
-            }
-          }
-        }
-        closeModal();
-      });
-      document.getElementById('modal-confirm-btn').classList.add('danger'); // Make button red
-    }
-
-    function showReviewRequests() {
-        if (reviewRequests.length === 0) {
-            openModal('Permintaan Tinjauan Akun', '<p style="color: var(--text-muted); text-align: center;">Tidak ada permintaan tinjauan akun saat ini.</p>', 'Oke', null);
-            document.getElementById('modal-confirm-btn').style.display = 'block'; 
-            document.querySelector('#modal-actions .cancel-btn').style.display = 'none'; // Hide cancel button, only 'Oke'
-            return;
-        }
-
-        const reviewHtml = reviewRequests.map((req, index) => `
-            <div class="review-request-item">
-                <p><strong>Pengguna:</strong> ${req.username}</p>
-                <p><strong>Alasan Banding:</strong> ${req.reason}</p>
-                <div class="actions">
-                    <button class="success" onclick="processReviewRequest(${index}, 'accept')"><i class="fas fa-check"></i> Terima Banding</button>
-                    <button class="danger" onclick="processReviewRequest(${index}, 'reject')"><i class="fas fa-times"></i> Tolak Banding</button>
+            item.innerHTML = `
+                <div class="status-avatar ${statusClass}">${avatarContent}</div>
+                <div class="status-info">
+                    <div class="status-name">${user.username}</div>
+                    <div class="status-time">${status.time}</div>
                 </div>
-            </div>
-        `).join('');
+            `;
+            statusListContainer.appendChild(item);
 
-        openModal('Tinjau Permintaan Banding', `<div class="modal-scrollable-content">${reviewHtml}</div>`, 'Tutup', null);
-        document.getElementById('modal-confirm-btn').style.display = 'none'; 
-        document.querySelector('#modal-actions .cancel-btn').innerText = 'Tutup';
-        document.querySelector('#modal-actions .cancel-btn').onclick = closeModal;
+            item.addEventListener('click', () => viewStatus(user.id, status.content));
+        });
     }
 
-    function processReviewRequest(index, action) {
-        const request = reviewRequests[index];
-        const userIndex = users.findIndex(u => u.username === request.username);
+    function viewStatus(userId, content) {
+        alert(`Status dari ${users.find(u => u.id === userId)?.username}:\n\n"${content}"\n\n(Simulasi: Klik OK untuk melihat status selanjutnya atau keluar.)`);
+        // In a real app, this would open a full-screen status viewer
+        // Mark status as seen (for demo, just update the local data)
+        const statusToUpdate = statuses.find(s => s.userId === userId);
+        if (statusToUpdate) {
+            statusToUpdate.isSeen = true;
+            renderStatusList(); // Re-render to update seen/unseen circle
+        }
+    }
 
-        if (userIndex === -1) {
-            alert('Pengguna tidak ditemukan.');
-            reviewRequests.splice(index, 1);
-            localStorage.setItem('reviewRequests', JSON.stringify(reviewRequests));
-            showReviewRequests();
-            showAdminStats();
+    // --- Admin Control Logic ---
+    function updateAdminControlsVisibility() {
+        if (currentUser && currentUser.isAdmin) {
+            adminNavItem.style.display = 'flex';
+        } else {
+            adminNavItem.style.display = 'none';
+        }
+    }
+
+    function renderUserManagementList() {
+        userManagementList.innerHTML = ''; // Clear list
+        users.forEach(user => {
+            if (user.id === currentUser.id) return; // Don't allow managing self
+
+            const item = document.createElement('div');
+            item.classList.add('admin-list-item');
+            item.innerHTML = `
+                <div class="user-info">
+                    <div class="avatar">${user.avatar ? `<img src="${user.avatar}" />` : getInitials(user.username)}</div>
+                    <span class="username">${user.username} ${user.isAdmin ? '(Admin)' : ''}</span>
+                </div>
+                <div class="admin-actions">
+                    <button class="promote" data-user-id="${user.id}">${user.isAdmin ? 'Demote' : 'Promote'}</button>
+                    <button class="delete" data-user-id="${user.id}">Hapus</button>
+                </div>
+            `;
+            userManagementList.appendChild(item);
+        });
+
+        // Add event listeners after rendering
+        userManagementList.querySelectorAll('.admin-actions .promote').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = e.target.dataset.userId;
+                toggleUserAdminStatus(userId);
+            });
+        });
+        userManagementList.querySelectorAll('.admin-actions .delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = e.target.dataset.userId;
+                deleteUser(userId);
+            });
+        });
+    }
+
+    function addUser() {
+        const username = newUserUsernameInput.value.trim();
+        const password = newUserPasswordInput.value.trim();
+
+        if (!username || !password) {
+            alert('Username dan password pengguna baru tidak boleh kosong!');
+            return;
+        }
+        if (users.some(u => u.username === username)) {
+            alert('Username ini sudah ada.');
             return;
         }
 
-        const targetUser = users[userIndex];
-        let responseMessage = '';
-
-        if (action === 'accept') {
-            targetUser.banned = false;
-            responseMessage = `Pemberitahuan Sistem: Administrator telah meninjau banding Anda. Akun Anda berhasil dibuka! Selamat datang kembali di Annas Chat.`;
-            alert(`Akun ${targetUser.username} berhasil dibuka. Pemberitahuan akan dikirim.`);
-        } else { 
-            responseMessage = `Pemberitahuan Sistem: Administrator telah meninjau banding Anda, namun permintaan Anda ditolak. Akun Anda tetap diblokir. Mohon tinjau ulang kebijakan kami.`;
-            alert(`Akun ${targetUser.username} ditolak untuk dibuka. Pemberitahuan akan dikirim.`);
-        }
-
-        // Send message from 'annas' (admin) to the user's chat history
-        const adminUser = users.find(u => u.role === 'admin');
-        const adminUsername = adminUser ? adminUser.username : 'admin';
-
-        const chatKey = `${adminUsername}-${targetUser.username}`; 
-        if (!messages[chatKey]) messages[chatKey] = [];
-        messages[chatKey].push({
-            sender: adminUsername, 
-            receiver: targetUser.username,
-            type: 'text',
-            content: responseMessage,
-            timestamp: getTimestamp()
-        });
-        saveMessages();
-
-
-        reviewRequests.splice(index, 1);
-        localStorage.setItem('reviewRequests', JSON.stringify(reviewRequests));
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        refreshChatList(); 
-        showAdminStats(); 
-        showReviewRequests(); 
-    }
-
-    // --- User Control Functions ---
-    function showEditProfileModal() {
-      const fileInputHtml = `<input type="file" id="profile-pic-input" accept="image/*" style="display:none;" onchange="previewProfilePic(event)">`;
-
-      openModal('Edit Profil Anda', `
-        <div class="profile-pic-upload-container">
-            <div class="profile-pic-preview" id="profile-pic-preview">
-                ${currentUser.profilePic ? `<img src="${currentUser.profilePic}" alt="PP">` : `<span class="initials">${currentUser.displayName.charAt(0).toUpperCase()}</span>`}
-            </div>
-            <label for="profile-pic-input" class="upload-btn"><i class="fas fa-camera"></i> Unggah Foto Profil</label>
-            ${fileInputHtml}
-        </div>
-        <p style="color: var(--text-muted);">Nama Panggilan Anda:</p>
-        <input type="text" id="edit-display-name" placeholder="Nama Panggilan Baru" value="${currentUser.displayName}">
-        <p style="color: var(--text-muted);">Username Anda:</p>
-        <input type="text" id="edit-username" placeholder="Username Baru (tidak bisa diubah)" value="${currentUser.username}" disabled>
-        <p style="color: var(--text-muted);">Bio/Status Anda:</p>
-        <textarea id="edit-bio" placeholder="Tulis bio singkat Anda">${currentUser.bio || ''}</textarea>
-      `, 'Simpan Perubahan', () => {
-        const newDisplayName = document.getElementById('edit-display-name').value.trim();
-        const newBio = document.getElementById('edit-bio').value.trim();
-        const newProfilePicFile = document.getElementById('profile-pic-input').files[0];
-
-        if (newDisplayName && newDisplayName !== currentUser.displayName) {
-          currentUser.displayName = newDisplayName;
-        }
-        if (newBio !== currentUser.bio) { 
-          currentUser.bio = newBio;
-        }
-
-        if (newProfilePicFile) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                currentUser.profilePic = e.target.result;
-                localStorage.setItem('users', JSON.stringify(users));
-                alert('Profil berhasil diperbarui!');
-                refreshChatList(); // Update main list
-                closeModal();
-            }
-            reader.readAsDataURL(newProfilePicFile);
-        } else {
-            localStorage.setItem('users', JSON.stringify(users));
-            alert('Profil berhasil diperbarui!');
-            refreshChatList();
-            closeModal();
-        }
-      });
-    }
-
-    function previewProfilePic(event) {
-        const reader = new FileReader();
-        reader.onload = function(){
-            const output = document.getElementById('profile-pic-preview');
-            output.innerHTML = `<img src="${reader.result}" alt="Preview">`;
+        const newUser = {
+            id: 'u' + (users.length + 1).toString().padStart(3, '0'),
+            username: username,
+            password: password,
+            isAdmin: false,
+            statusMessage: 'Pengguna baru!',
+            avatar: null
         };
-        reader.readAsDataURL(event.target.files[0]);
+        users.push(newUser);
+        newUserUsernameInput.value = '';
+        newUserPasswordInput.value = '';
+        alert('Pengguna baru berhasil ditambahkan!');
+        renderUserManagementList();
+        updateAdminStats();
     }
 
-    function changePassword() {
-      openModal('Ganti Password', `
-        <input type="password" id="old-password" placeholder="Password Lama Anda">
-        <input type="password" id="new-password" placeholder="Password Baru (min 6 karakter)">
-        <input type="password" id="confirm-new-password" placeholder="Konfirmasi Password Baru">
-      `, 'Ganti Password', () => {
-        const oldPass = document.getElementById('old-password').value;
-        const newPass = document.getElementById('new-password').value;
-        const confirmNewPass = document.getElementById('confirm-new-password').value;
-
-        if (oldPass !== currentUser.password) {
-          alert('Password lama salah.');
-          return;
+    function toggleUserAdminStatus(userId) {
+        const userIndex = users.findIndex(u => u.id === userId);
+        if (userIndex > -1) {
+            users[userIndex].isAdmin = !users[userIndex].isAdmin;
+            alert(`${users[userIndex].username} sekarang ${users[userIndex].isAdmin ? 'adalah Admin' : 'bukan Admin lagi'}.`);
+            renderUserManagementList();
         }
-        if (newPass.length < 6) {
-          alert('Password baru minimal 6 karakter.');
-          return;
+    }
+
+    function deleteUser(userId) {
+        if (confirm(`Apakah Anda yakin ingin menghapus pengguna ini? Ini tidak dapat diurungkan.`)) {
+            const initialUserCount = users.length;
+            users = users.filter(user => user.id !== userId);
+            if (users.length < initialUserCount) {
+                alert('Pengguna berhasil dihapus.');
+                // Also remove any chats they were the sole participant of (simplified)
+                chats = chats.filter(chat => !chat.participants.includes(userId) || chat.participants.length > 1);
+
+                renderUserManagementList();
+                updateAdminStats();
+                if (activeChatId && activeChatId === userId) {
+                    showScreen('main-chat-list-screen'); // If active chat was with deleted user
+                }
+            } else {
+                alert('Gagal menghapus pengguna.');
+            }
         }
-        if (newPass !== confirmNewPass) {
-          alert('Konfirmasi password baru tidak cocok.');
-          return;
+    }
+
+    function updateAdminStats() {
+        totalUsersStat.textContent = users.length;
+        // These are very basic simulations
+        messagesTodayStat.textContent = Math.floor(Math.random() * 500) + 100; // Random number
+        // activeCallsStat is updated by call functions
+    }
+
+    // --- Event Listeners ---
+    authSubmitBtn.addEventListener('click', handleAuthSubmit);
+    toggleAuthLink.addEventListener('click', toggleAuthMode);
+    promoBannerCloseBtn?.addEventListener('click', function() {
+        this.closest('#promo-banner').style.display = 'none';
+    });
+    fabChat.addEventListener('click', () => {
+        alert('Fitur "Buat Chat Baru" belum diimplementasikan sepenuhnya. Anda bisa menambahkan logika untuk memilih kontak di sini.');
+    });
+    backToChatsBtn.addEventListener('click', () => {
+        showScreen('main-chat-list-screen');
+        activeChatId = null;
+        renderChatList(); // Refresh chat list
+    });
+    sendMessageBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
         }
-
-        currentUser.password = newPass;
-        localStorage.setItem('users', JSON.stringify(users));
-        alert('Password berhasil diganti.');
-        closeModal();
-      });
-    }
-
-    // --- Ban Review Request for Banned Users ---
-    function showRequestReviewModal() {
-        openModal('Akun Anda Diblokir', `
-            <p style="text-align: center; color: var(--danger-color); font-weight: bold; font-size:1.1em;"><i class="fas fa-ban"></i> AKUN ANDA DIBLOKIR</p>
-            <p style="color: var(--text-light); text-align: center; margin-top: 15px;">Akun Anda telah diblokir karena melanggar kebijakan penggunaan Annas Chat. Anda dapat mengajukan banding untuk peninjauan kembali.</p>
-            <p style="color: var(--text-muted); margin-top: 20px;">Silakan berikan alasan yang jelas mengapa Anda merasa akun Anda harus diaktifkan kembali:</p>
-            <textarea id="review-reason" placeholder="Ketik alasan banding Anda di sini... (Contoh: Saya tidak sengaja, Saya berjanji tidak akan mengulanginya, dst.)" rows="6" style="width:100%; margin-top:15px; background-color: var(--accent-blue); color: var(--text-light); border: 1px solid var(--border-color);"></textarea>
-        `, 'Kirim Permintaan Banding', () => {
-            const reason = document.getElementById('review-reason').value.trim();
-            if (!reason) {
-                alert('Alasan banding tidak boleh kosong.');
-                return;
-            }
-
-            if (reviewRequests.some(req => req.username === currentUser.username)) {
-                alert('Anda sudah memiliki permintaan banding yang tertunda. Mohon tunggu balasan administrator.');
-                closeModal();
-                return;
-            }
-
-            reviewRequests.push({
-                username: currentUser.username,
-                reason: reason,
-                timestamp: new Date().toISOString()
-            });
-            localStorage.setItem('reviewRequests', JSON.stringify(reviewRequests));
-            alert('Permintaan banding Anda telah berhasil dikirim ke administrator. Kami akan meninjaunya dan Anda akan menerima notifikasi di chat Annas AI.');
-            closeModal();
-        });
-        document.getElementById('modal-actions').style.justifyContent = 'center'; 
-        document.getElementById('modal-confirm-btn').classList.remove('cancel-btn'); 
-        document.getElementById('modal-confirm-btn').classList.add('confirm-btn'); 
-        // Hide cancel button if only review is allowed
-        document.querySelector('#modal-actions .cancel-btn').style.display = 'none';
-    }
-
-
-    // --- Universal Modal Functions ---
-    function openModal(title, bodyHtml, confirmText, onConfirm) {
-      document.getElementById('modal-title').innerText = title;
-      document.getElementById('modal-body').innerHTML = bodyHtml;
-      const confirmBtn = document.getElementById('modal-confirm-btn');
-      confirmBtn.innerText = confirmText;
-      confirmBtn.classList.remove('danger', 'success', 'info', 'default'); // Reset classes
-      confirmBtn.classList.add('confirm-btn'); // Ensure it has default confirm style
-
-      if (onConfirm) {
-        confirmBtn.onclick = onConfirm;
-        confirmBtn.style.display = 'block';
-        document.querySelector('#modal-actions .cancel-btn').style.display = 'block'; // Show cancel by default
-        document.querySelector('#modal-actions .cancel-btn').innerText = 'Batal';
-        document.querySelector('#modal-actions .cancel-btn').onclick = closeModal;
-      } else {
-        confirmBtn.style.display = 'none'; // Hide confirm if no action
-        document.querySelector('#modal-actions .cancel-btn').style.display = 'block'; // Still show 'Tutup' button
-        document.querySelector('#modal-actions .cancel-btn').innerText = confirmText; // Use confirmText for cancel button if no confirm action
-        document.querySelector('#modal-actions .cancel-btn').onclick = closeModal;
-      }
-      document.getElementById('modal-backdrop').classList.add('show');
-      document.getElementById('modal-actions').style.justifyContent = onConfirm ? 'flex-end' : 'center'; 
-    }
-
-    function closeModal() {
-      document.getElementById('modal-backdrop').classList.remove('show');
-      document.getElementById('modal-body').innerHTML = ''; // Clear modal body content
-    }
-
-    // Initialize on load
-    document.addEventListener('DOMContentLoaded', () => {
-        showLoadingScreen();
-        // Load currentUser from localStorage if exists
-        const storedUsername = localStorage.getItem('currentUserUsername');
-        if (storedUsername) {
-            currentUser = users.find(u => u.username === storedUsername);
-        }
-
-        setTimeout(() => {
-            hideLoadingScreen();
-            if (currentUser && !currentUser.banned) { // Check if user exists and is not banned
-                showScreen('main-chat-list-screen');
-                refreshChatList();
-            } else if (currentUser && currentUser.banned) { // If banned, show review modal
-                showScreen('auth-screen'); // Stay on auth screen
-                toggleAuthScreen('login'); // Ensure login form is visible
-                document.getElementById('login-username').value = currentUser.username;
-                // document.getElementById('login-password').focus(); // Prompt for password
-                showRequestReviewModal();
-            }
-             else {
-                showScreen('auth-screen');
-                toggleAuthScreen('login'); // Default to login screen
-            }
-        }, 4500); // Increased timeout for hacker effect animation
     });
 
-    // Save current user on successful login
-    const originalLogin = login;
-    login = function() {
-        const usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
-        const password = document.getElementById('login-password').value.trim();
-        const user = users.find(u => u.username === usernameInput && u.password === password);
-
-        if (user) {
-            localStorage.setItem('currentUserUsername', user.username); // Save username for next session
+    callButton.addEventListener('click', () => {
+        // Find the user/group ID from the current active chat
+        if (activeChatId) {
+            startCall(activeChatId);
+        } else {
+            alert('Pilih chat untuk memulai panggilan.');
         }
-        originalLogin(); // Call the original login logic
-    };
+    });
+    endCallBtn.addEventListener('click', endCall);
 
-    // Clear current user on logout
-    const originalLogout = logout;
-    logout = function() {
-        localStorage.removeItem('currentUserUsername');
-        originalLogout();
-    };
+    myStatusAvatar?.addEventListener('click', () => {
+        alert('Ketuk untuk memperbarui status Anda. (Fitur ini dapat dikembangkan untuk mengunggah gambar/teks status)');
+    });
+    addStatusIcon?.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent myStatusAvatar click event
+        alert('Tambah status baru! (Anda bisa menambahkan logika untuk membuat status baru di sini)');
+    });
 
+
+    // Admin controls
+    backFromAdminBtn.addEventListener('click', () => {
+        showScreen('main-chat-list-screen');
+    });
+    addUserBtn.addEventListener('click', addUser);
+
+    // Bottom navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+
+            const targetScreenId = this.dataset.screen;
+            if (targetScreenId === 'main-chat-list-screen') {
+                showScreen('main-chat-list-screen');
+                renderChatList();
+            } else if (targetScreenId === 'call-screen-nav') {
+                 // For now, if no active chat, just show call screen as "idle"
+                startCall(null); // Pass null to indicate not calling a specific chat yet
+            } else if (targetScreenId === 'status-screen') {
+                showScreen('status-screen');
+                renderStatusList();
+            } else if (targetScreenId === 'admin-control-screen') {
+                if (currentUser && currentUser.isAdmin) {
+                    showScreen('admin-control-screen');
+                    renderUserManagementList();
+                    updateAdminStats();
+                } else {
+                    alert('Anda tidak memiliki akses admin!');
+                    // Revert active state if not admin
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.nav-item[data-screen="main-chat-list-screen"]').classList.add('active');
+                }
+            }
+        });
+    });
+
+
+    // --- Initial Load Logic ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Simulate initial loading
+        loadingScreen.classList.add('show');
+        const consoleText = `
+Connecting to Annas Chat Server...
+Authenticating user session...
+Loading secure modules...
+Establishing encrypted connection...
+Initialization complete.
+Access Granted.
+`;
+        const consoleElement = document.querySelector('.hacker-console');
+        consoleElement.textContent = ''; // Clear existing text
+
+        let i = 0;
+        const speed = 30; // typing speed
+        function typeWriter() {
+            if (i < consoleText.length) {
+                consoleElement.textContent += consoleText.charAt(i);
+                i++;
+                setTimeout(typeWriter, speed);
+            } else {
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    loadingScreen.addEventListener('transitionend', () => {
+                        loadingScreen.style.display = 'none';
+                        showScreen('auth-screen'); // Show auth screen after loading
+                    }, { once: true });
+                }, 1000); // Wait a bit after typing finishes
+            }
+        }
+        typeWriter();
+    });
   </script>
 </body>
 </html>
